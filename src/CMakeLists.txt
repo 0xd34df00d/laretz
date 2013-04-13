@@ -1,0 +1,12 @@
+CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
+PROJECT (laretz)
+
+FIND_PACKAGE (Boost REQUIRED)
+
+SET (SRCS
+	main.cpp
+	)
+
+ADD_EXECUTABLE (laretz WIN32
+	${SRCS}
+	)
