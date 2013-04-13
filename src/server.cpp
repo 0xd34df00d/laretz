@@ -27,10 +27,51 @@
  **********************************************************************/
 
 #include "server.h"
+#include <thread>
+#include <iostream>
+#include "clientconnection.h"
 
-int main(int argc, char **argv)
+namespace Laretz
 {
-	Laretz::Server s;
-	s.run ();
-	return 0;
+	namespace ip = boost::asio::ip;
+
+	Server::Server ()
+	: m_acceptor (m_io)
+	{
+		std::string address = "127.0.0.1";
+		ip::tcp::resolver resolver (m_io);
+		ip::tcp::endpoint ep = *resolver.resolve (ip::tcp::resolver::query (address, "54093"));
+
+		m_acceptor.open (ep.protocol());
+		m_acceptor.set_option (ip::tcp::acceptor::reuse_address (true));
+		m_acceptor.bind (ep);
+		m_acceptor.listen ();
+
+		startAccept ();
+	}
+
+	void Server::run ()
+	{
+		std::vector<std::thread> threads;
+		for (size_t i = 0; i < std::max<size_t> (std::thread::hardware_concurrency (), 2); ++i)
+			threads.emplace_back([this] () { m_io.run (); });
+
+		for (auto& t : threads)
+			t.join ();
+	}
+
+	void Server::startAccept ()
+	{
+		m_conn.reset (new ClientConnection (m_io));
+		m_acceptor.async_accept (m_conn->getSocket (),
+				[this] (const boost::system::error_code& ec) { handleAccept (ec); });
+	}
+
+	void Server::handleAccept (const boost::system::error_code& ec)
+	{
+		if (!ec)
+			m_conn->start ();
+
+		startAccept ();
+	}
 }

@@ -26,11 +26,32 @@
  * DEALINGS IN THE SOFTWARE.
  **********************************************************************/
 
-#include "server.h"
+#pragma once
 
-int main(int argc, char **argv)
+#include <memory>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/strand.hpp>
+#include <boost/asio/streambuf.hpp>
+#include <boost/enable_shared_from_this.hpp>
+
+namespace Laretz
 {
-	Laretz::Server s;
-	s.run ();
-	return 0;
+	class ClientConnection : public std::enable_shared_from_this<ClientConnection>
+						   , private boost::noncopyable
+	{
+		boost::asio::io_service& m_io;
+		boost::asio::ip::tcp::socket m_socket;
+		boost::asio::strand m_strand;
+		boost::asio::streambuf m_buf;
+	public:
+		ClientConnection (boost::asio::io_service&);
+
+		boost::asio::ip::tcp::socket& getSocket ();
+
+		void start ();
+	private:
+		void handleRead (const boost::system::error_code&, size_t);
+	};
+
+	typedef std::shared_ptr<ClientConnection> ClientConnection_ptr;
 }

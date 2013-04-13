@@ -26,11 +26,26 @@
  * DEALINGS IN THE SOFTWARE.
  **********************************************************************/
 
-#include "server.h"
+#pragma once
 
-int main(int argc, char **argv)
+#include <boost/asio/io_service.hpp>
+#include <boost/asio/ip/tcp.hpp>
+
+namespace Laretz
 {
-	Laretz::Server s;
-	s.run ();
-	return 0;
+	class ClientConnection;
+
+	class Server
+	{
+		boost::asio::io_service m_io;
+		boost::asio::ip::tcp::acceptor m_acceptor;
+		std::shared_ptr<ClientConnection> m_conn;
+	public:
+		Server ();
+
+		void run ();
+	private:
+		void startAccept ();
+		void handleAccept (const boost::system::error_code&);
+	};
 }
