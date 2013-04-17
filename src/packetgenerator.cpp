@@ -58,16 +58,22 @@ namespace Laretz
 
 	std::string PacketGenerator::operator() () const
 	{
+		std::string opsStr;
+		if (!m_operations.empty ())
+		{
+			std::ostringstream ostr;
+			boost::archive::text_oarchive oars (ostr);
+			oars << m_operations;
+			opsStr = ostr.str ();
+		}
+
 		std::ostringstream ostr;
+		ostr << "Length: " << opsStr.size () << "\n";
 		for (const auto& field : m_fields)
 			ostr << field.first << ": " << field.second << "\n";
 		ostr << "\n";
 
-		if (!m_operations.empty ())
-		{
-			boost::archive::text_oarchive oars (ostr);
-			oars << m_operations;
-		}
+		ostr << opsStr;
 
 		return ostr.str ();
 	}
