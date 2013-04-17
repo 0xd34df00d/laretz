@@ -31,10 +31,11 @@
 
 namespace Laretz
 {
-	DB::DB ()
+	DB::DB (const std::string& m_dbName)
+	: m_dbPrefix (m_dbName + '.')
+	, m_conn (new mongo::DBClientConnection)
 	{
-		mongo::DBClientConnection c;
-		c.connect ("localhost");
+		m_conn->connect ("localhost");
 	}
 
 	std::unordered_set<std::string> DB::enumerateItems (uint64_t after, const std::string& parent) const

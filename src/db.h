@@ -28,11 +28,17 @@
 
 #pragma once
 
+#include <memory>
 #include <unordered_map>
 #include <unordered_set>
 #include <string>
 #include <boost/optional.hpp>
 #include "operation.h"
+
+namespace mongo
+{
+	class DBClientConnection;
+}
 
 namespace Laretz
 {
@@ -50,8 +56,10 @@ namespace Laretz
 
 	class DB
 	{
+		const std::string m_dbPrefix;
+		const std::shared_ptr<mongo::DBClientConnection> m_conn;
 	public:
-		DB ();
+		DB (const std::string&);
 
 		std::unordered_set<std::string> enumerateItems (uint64_t after = 0, const std::string& parentId = std::string ()) const;
 		boost::optional<Item> loadItem (const std::string& id);

@@ -30,6 +30,7 @@
 
 #include <memory>
 #include <string>
+#include <mongo/client/dbclientinterface.h>
 
 namespace Laretz
 {
@@ -39,10 +40,12 @@ namespace Laretz
 	struct UserContext
 	{
 		std::string m_login;
+		std::string m_password;
 	};
 
 	class DBManager
 	{
+		mongo::DBClientConnection m_conn;
 	public:
 		DBManager ();
 

@@ -27,10 +27,25 @@
  **********************************************************************/
 
 #include "dbmanager.h"
+#include "db.h"
 
 namespace Laretz
 {
 	DBManager::DBManager ()
 	{
+		m_conn.connect ("localhost");
+	}
+
+	DB_ptr DBManager::GetDB (const UserContext& ctx)
+	{
+		auto cursor = m_conn.query ("sync.users",
+				BSON ("login" << ctx.m_login << "password" << ctx.m_password));
+		if (!cursor->more ())
+			throw std::runtime_error ("unknown login or incorrect password");
+
+		auto obj = cursor->next ();
+		const auto& dbName = obj.getStringField ("db");
+
+		return DB_ptr (new DB (dbName));
 	}
 }
