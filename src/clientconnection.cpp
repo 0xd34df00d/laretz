@@ -27,12 +27,14 @@
  **********************************************************************/
 
 #include "clientconnection.h"
-#include "packetparser.h"
-#include "operation.h"
 #include <string>
 #include <iostream>
 #include <boost/asio/read_until.hpp>
+#include <boost/asio/write.hpp>
 #include <boost/lexical_cast.hpp>
+#include "packetparser.h"
+#include "packetgenerator.h"
+#include "operation.h"
 
 namespace
 {
@@ -126,8 +128,17 @@ namespace Laretz
 		}
 		catch (const std::exception& e)
 		{
-			// TODO
+			writeErrorResponse ("invalid packet format");
 			return;
 		}
+	}
+
+	void ClientConnection::writeErrorResponse (const std::string& reason)
+	{
+		const auto& data = PacketGenerator ({ { "ReplyType", "Error" }, { "Reason", reason } }) ();
+		auto shared = shared_from_this ();
+		boost::asio::async_write (m_socket,
+				boost::asio::buffer (data),
+				[shared] (const boost::system::error_code&, std::size_t) {});
 	}
 }
