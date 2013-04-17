@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright 2013 Georg Rudoy 0xd34df00d@gmail.com
+ * Copyright 2013 Georg Rudoy <0xd34df00d@gmail.com>
  *
  * Boost Software License - Version 1.0 - August 17th, 2003
  *
@@ -27,6 +27,8 @@
  **********************************************************************/
 
 #include "clientconnection.h"
+#include "packetparser.h"
+#include "operation.h"
 #include <string>
 #include <iostream>
 #include <boost/asio/read_until.hpp>
@@ -85,8 +87,9 @@ namespace Laretz
 {
 	namespace asio = boost::asio;
 
-	ClientConnection::ClientConnection (boost::asio::io_service& io)
-	: m_io (io)
+	ClientConnection::ClientConnection (boost::asio::io_service& io, std::shared_ptr<DBManager> dbMgr)
+	: m_dbMgr (dbMgr)
+	, m_io (io)
 	, m_socket (io)
 	, m_strand (io)
 	{
@@ -111,8 +114,20 @@ namespace Laretz
 		if (ec)
 			return;
 
-		std::string data (asio::buffer_cast<const char*> (m_buf.data ()), bytesRead);
+		const std::string data (asio::buffer_cast<const char*> (m_buf.data ()), bytesRead);
 		m_buf.consume (bytesRead);
 		start ();
+
+		Operation op;
+		std::map<std::string, std::string> fields;
+		try
+		{
+			std::tie (op, fields) = PacketParser ().Parse (data);
+		}
+		catch (const std::exception& e)
+		{
+			// TODO
+			return;
+		}
 	}
 }

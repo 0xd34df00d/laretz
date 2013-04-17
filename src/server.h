@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright 2013 Georg Rudoy 0xd34df00d@gmail.com
+ * Copyright 2013 Georg Rudoy <0xd34df00d@gmail.com>
  *
  * Boost Software License - Version 1.0 - August 17th, 2003
  *
@@ -34,12 +34,14 @@
 namespace Laretz
 {
 	class ClientConnection;
+	class DBManager;
 
 	class Server
 	{
 		boost::asio::io_service m_io;
 		boost::asio::ip::tcp::acceptor m_acceptor;
 		std::shared_ptr<ClientConnection> m_conn;
+		std::shared_ptr<DBManager> m_dbMgr;
 	public:
 		Server ();
 

@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright 2013 Georg Rudoy 0xd34df00d@gmail.com
+ * Copyright 2013 Georg Rudoy <0xd34df00d@gmail.com>
  *
  * Boost Software License - Version 1.0 - August 17th, 2003
  *
@@ -32,19 +32,22 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/asio/streambuf.hpp>
-#include <boost/enable_shared_from_this.hpp>
 
 namespace Laretz
 {
+	class DBManager;
+
 	class ClientConnection : public std::enable_shared_from_this<ClientConnection>
 						   , private boost::noncopyable
 	{
+		const std::shared_ptr<DBManager> m_dbMgr;
+
 		boost::asio::io_service& m_io;
 		boost::asio::ip::tcp::socket m_socket;
 		boost::asio::strand m_strand;
 		boost::asio::streambuf m_buf;
 	public:
-		ClientConnection (boost::asio::io_service&);
+		ClientConnection (boost::asio::io_service&, std::shared_ptr<DBManager>);
 
 		boost::asio::ip::tcp::socket& getSocket ();
 

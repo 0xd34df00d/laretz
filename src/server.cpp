@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright 2013 Georg Rudoy 0xd34df00d@gmail.com
+ * Copyright 2013 Georg Rudoy <0xd34df00d@gmail.com>
  *
  * Boost Software License - Version 1.0 - August 17th, 2003
  *
@@ -30,6 +30,7 @@
 #include <thread>
 #include <iostream>
 #include "clientconnection.h"
+#include "dbmanager.h"
 
 namespace Laretz
 {
@@ -37,6 +38,7 @@ namespace Laretz
 
 	Server::Server ()
 	: m_acceptor (m_io)
+	, m_dbMgr (new DBManager)
 	{
 		std::string address = "127.0.0.1";
 		ip::tcp::resolver resolver (m_io);
@@ -62,7 +64,7 @@ namespace Laretz
 
 	void Server::startAccept ()
 	{
-		m_conn.reset (new ClientConnection (m_io));
+		m_conn.reset (new ClientConnection (m_io, m_dbMgr));
 		m_acceptor.async_accept (m_conn->getSocket (),
 				[this] (const boost::system::error_code& ec) { handleAccept (ec); });
 	}
