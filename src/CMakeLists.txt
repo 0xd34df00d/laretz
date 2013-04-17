@@ -14,6 +14,7 @@ SET (SRCS
 	packetparser.cpp
 	db.cpp
 	dbmanager.cpp
+	packetgenerator.cpp
 	)
 
 ADD_EXECUTABLE (laretz WIN32
