@@ -35,6 +35,7 @@
 #include "packetparser.h"
 #include "packetgenerator.h"
 #include "operation.h"
+#include "dbmanager.h"
 
 namespace
 {
@@ -131,11 +132,31 @@ namespace Laretz
 			writeErrorResponse ("invalid packet format");
 			return;
 		}
+
+		auto getSafe = [&fields] (const std::string& name) -> std::string
+		{
+			const auto pos = fields.find (name);
+			return pos == fields.end () ? std::string () : pos->second;
+		};
+		const auto& login = getSafe ("Login");
+		const auto& pass = getSafe ("Password");
+
+		DB_ptr db;
+		try
+		{
+			db = m_dbMgr->GetDB ({ login, pass });
+		}
+		catch (const std::exception& e)
+		{
+			writeErrorResponse (std::string ("unable to get database: ") + e.what ());
+			return;
+		}
 	}
 
 	void ClientConnection::writeErrorResponse (const std::string& reason)
 	{
-		const auto& data = PacketGenerator ({ { "ReplyType", "Error" }, { "Reason", reason } }) ();
+		PacketGenerator pg ({ { "ReplyType", "Error" }, { "Reason", reason } });
+		const auto& data = pg ();
 		auto shared = shared_from_this ();
 		boost::asio::async_write (m_socket,
 				boost::asio::buffer (data),
