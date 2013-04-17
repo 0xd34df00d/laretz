@@ -65,7 +65,7 @@ namespace Laretz
 			fields.insert ({ splitVec [0], splitVec [1] });
 		}
 
-		Operation op;
+		std::vector<Operation> op;
 		boost::archive::text_iarchive iars (istr);
 		iars >> op;
 

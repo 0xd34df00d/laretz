@@ -118,11 +118,11 @@ namespace Laretz
 		m_buf.consume (bytesRead);
 		start ();
 
-		Operation op;
+		std::vector<Operation> ops;
 		std::map<std::string, std::string> fields;
 		try
 		{
-			std::tie (op, fields) = PacketParser ().Parse (data);
+			std::tie (ops, fields) = PacketParser ().Parse (data);
 		}
 		catch (const std::exception& e)
 		{

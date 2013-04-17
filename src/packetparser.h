@@ -30,6 +30,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 
 namespace Laretz
 {
@@ -39,7 +40,7 @@ namespace Laretz
 	{
 	public:
 		typedef std::map<std::string, std::string> HeaderFields_t;
-		typedef std::tuple<Operation, HeaderFields_t> ParseResult_t;
+		typedef std::tuple<std::vector<Operation>, HeaderFields_t> ParseResult_t;
 
 		PacketParser ();
 
