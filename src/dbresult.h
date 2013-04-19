@@ -28,25 +28,27 @@
 
 #pragma once
 
-#include <map>
-#include <string>
-#include <vector>
-#include "dbresult.h"
+#include <boost/variant.hpp>
+#include <boost/serialization/access.hpp>
+#include "item.h"
 
 namespace Laretz
 {
-	class PacketGenerator
+	typedef boost::variant<std::vector<Item>, std::vector<ShortItem>> ResultSet_t;
+
+	class DBResult
 	{
-		std::map<std::string, std::string> m_fields;
-		std::vector<DBResult> m_operations;
+		ResultSet_t m_result;
+
+		friend class boost::serialization::access;
 	public:
-		PacketGenerator ();
-		PacketGenerator (std::map<std::string, std::string>&&);
-
-		PacketGenerator& operator<< (const std::pair<std::string, std::string>& field);
-		PacketGenerator& operator<< (const DBResult&);
-		PacketGenerator& operator<< (const std::vector<DBResult>&);
-
-		std::string operator() () const;
+		DBResult ();
+		DBResult (const ResultSet_t&);
+	private:
+		template<typename Ar>
+		void serialize (Ar& ar, const size_t)
+		{
+			ar & m_result;
+		}
 	};
 }

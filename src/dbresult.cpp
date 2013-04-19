@@ -26,27 +26,16 @@
  * DEALINGS IN THE SOFTWARE.
  **********************************************************************/
 
-#pragma once
-
-#include <map>
-#include <string>
-#include <vector>
 #include "dbresult.h"
 
 namespace Laretz
 {
-	class PacketGenerator
+	DBResult::DBResult ()
 	{
-		std::map<std::string, std::string> m_fields;
-		std::vector<DBResult> m_operations;
-	public:
-		PacketGenerator ();
-		PacketGenerator (std::map<std::string, std::string>&&);
+	}
 
-		PacketGenerator& operator<< (const std::pair<std::string, std::string>& field);
-		PacketGenerator& operator<< (const DBResult&);
-		PacketGenerator& operator<< (const std::vector<DBResult>&);
-
-		std::string operator() () const;
-	};
+	DBResult::DBResult (const ResultSet_t& set)
+	: m_result (set)
+	{
+	}
 }

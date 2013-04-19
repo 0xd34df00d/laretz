@@ -32,6 +32,7 @@
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/string.hpp>
+#include <boost/serialization/variant.hpp>
 
 namespace Laretz
 {
@@ -50,9 +51,15 @@ namespace Laretz
 		return *this;
 	}
 
-	PacketGenerator& PacketGenerator::operator<< (const Operation& op)
+	PacketGenerator& PacketGenerator::operator<< (const DBResult& op)
 	{
 		m_operations.push_back (op);
+		return *this;
+	}
+
+	PacketGenerator& PacketGenerator::operator<< (const std::vector<DBResult>& ops)
+	{
+		std::copy (ops.begin (), ops.end (), std::back_inserter (m_operations));
 		return *this;
 	}
 
