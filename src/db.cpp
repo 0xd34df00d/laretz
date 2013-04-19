@@ -31,6 +31,15 @@
 
 namespace Laretz
 {
+	DBError::DBError (const std::string& reason)
+	: runtime_error (reason)
+	{
+	}
+
+	DBError::~DBError () throw ()
+	{
+	}
+
 	DB::DB (const std::string& m_dbName)
 	: m_dbPrefix ("user_" + m_dbName + '.')
 	, m_svcPrefix ("service_" + m_dbName + '.')
@@ -52,18 +61,16 @@ namespace Laretz
 
 	boost::optional<Item> DB::loadItem (const std::string& id)
 	{
-		auto idCursor = m_conn->query (m_svcPrefix + "id2parent", QUERY ("id" << id));
-		if (!idCursor->more ())
+		const auto& parentId = getParentId (id);
+		if (!parentId)
 			return {};
 
-		const auto& parentId = idCursor->next ().getStringField ("parentId");
-
-		auto cursor = m_conn->query (getNamespace (parentId), QUERY ("id" << id));
-		if (!idCursor->more ())
+		auto cursor = m_conn->query (getNamespace (*parentId), QUERY ("id" << id));
+		if (!cursor->more ())
 			return {};
 
 		const auto& obj = cursor->next ();
-		Item item { id, parentId, obj.getIntField ("seq") };
+		Item item { id, *parentId, obj ["seq"].Long () };
 
 		std::set<std::string> fieldNames;
 		obj.getFieldNames (fieldNames);
@@ -74,6 +81,28 @@ namespace Laretz
 			item.setField (fieldName, obj [fieldName]);
 
 		return item;
+	}
+
+	uint64_t DB::getSeqNum (const std::string& id)
+	{
+		const auto& parentId = getParentId (id);
+		if (!parentId)
+			throw DBError ("cannot fetch sequence number: unknown parent id for " + id);
+
+		auto cursor = m_conn->query (getNamespace (*parentId), QUERY ("id" << id));
+		if (!cursor->more ())
+			throw DBError ("cannot fetch sequence number: unknown item " + id);
+
+		return cursor->next () ["seq"].Long ();
+	}
+
+	boost::optional<std::string> DB::getParentId (const std::string& id) const
+	{
+		auto idCursor = m_conn->query (m_svcPrefix + "id2parent", QUERY ("id" << id));
+		if (!idCursor->more ())
+			return {};
+
+		return std::string (idCursor->next ().getStringField ("parentId"));
 	}
 
 	std::string DB::getNamespace (const std::string& parentId) const

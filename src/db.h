@@ -32,6 +32,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <string>
+#include <stdexcept>
 #include <boost/optional.hpp>
 #include "operation.h"
 #include "item.h"
@@ -43,6 +44,13 @@ namespace mongo
 
 namespace Laretz
 {
+	class DBError : public std::runtime_error
+	{
+	public:
+		DBError (const std::string&);
+		~DBError () throw ();
+	};
+
 	class DB
 	{
 		const std::string m_dbPrefix;
@@ -54,10 +62,13 @@ namespace Laretz
 		std::unordered_set<std::string> enumerateItems (uint64_t after = 0, const std::string& parentId = std::string ()) const;
 		boost::optional<Item> loadItem (const std::string& id);
 
+		uint64_t getSeqNum (const std::string& id);
+
 		void addItem (const Item&);
 		void modifyItem (const Item&);
 		void removeItem (const std::string& id);
 	private:
+		boost::optional<std::string> getParentId (const std::string&) const;
 		std::string getNamespace (const std::string&) const;
 	};
 }
