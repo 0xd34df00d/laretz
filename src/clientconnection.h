@@ -55,7 +55,7 @@ namespace Laretz
 	private:
 		void handleRead (const boost::system::error_code&, size_t);
 
-		void writeErrorResponse (const std::string& reason);
+		void writeErrorResponse (const std::string& reason, int code = -1);
 	};
 
 	typedef std::shared_ptr<ClientConnection> ClientConnection_ptr;

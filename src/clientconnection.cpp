@@ -163,15 +163,22 @@ namespace Laretz
 					boost::asio::buffer (pg ()),
 					[shared] (const boost::system::error_code&, std::size_t) {});
 		}
+		catch (const DBOpError& e)
+		{
+			writeErrorResponse (e.what (), e.getEC ());
+		}
 		catch (const std::exception& e)
 		{
 			writeErrorResponse (e.what ());
 		}
 	}
 
-	void ClientConnection::writeErrorResponse (const std::string& reason)
+	void ClientConnection::writeErrorResponse (const std::string& reason, int code)
 	{
-		const auto& data = PacketGenerator { { { "ReplyType", "Error" }, { "Reason", reason } } } ();
+		PacketGenerator pg { { { "ReplyType", "Error" }, { "Reason", reason } } };
+		if (code >= 0)
+			pg << std::make_pair ("ErrorCode", boost::lexical_cast<std::string> (code));
+		const auto& data = pg ();
 		auto shared = shared_from_this ();
 		boost::asio::async_write (m_socket,
 				boost::asio::buffer (data),

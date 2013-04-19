@@ -31,6 +31,7 @@
 #include <memory>
 #include <vector>
 #include <functional>
+#include <stdexcept>
 #include "operation.h"
 
 namespace Laretz
@@ -39,6 +40,23 @@ namespace Laretz
 
 	class DB;
 	typedef std::shared_ptr<DB> DB_ptr;
+
+	class DBOpError : public std::runtime_error
+	{
+	public:
+		enum ErrorCode
+		{
+			SeqOutdated = 100
+		};
+	private:
+		ErrorCode m_ec;
+		std::string m_reason;
+	public:
+		DBOpError (ErrorCode, const std::string&);
+		~DBOpError () throw ();
+
+		ErrorCode getEC () const;
+	};
 
 	class DBOperator
 	{

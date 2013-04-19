@@ -27,12 +27,29 @@
  **********************************************************************/
 
 #include "dboperator.h"
+#include <boost/lexical_cast.hpp>
 #include "db.h"
 #include "operation.h"
 #include "dbresult.h"
 
 namespace Laretz
 {
+	DBOpError::DBOpError (ErrorCode ec, const std::string& reason)
+	: runtime_error ("DB operation error " + boost::lexical_cast<std::string> (ec) + "; " + reason)
+	, m_ec (ec)
+	, m_reason (reason)
+	{
+	}
+
+	DBOpError::~DBOpError () throw ()
+	{
+	}
+
+	DBOpError::ErrorCode DBOpError::getEC () const
+	{
+		return m_ec;
+	}
+
 	DBOperator::DBOperator (DB_ptr db)
 	: m_db { db }
 	, m_op2func {
