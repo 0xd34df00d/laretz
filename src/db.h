@@ -34,6 +34,7 @@
 #include <string>
 #include <boost/optional.hpp>
 #include "operation.h"
+#include "item.h"
 
 namespace mongo
 {
@@ -42,21 +43,10 @@ namespace mongo
 
 namespace Laretz
 {
-	typedef std::unordered_map<std::string, Field_t> ItemFields_t;
-
-	struct Item
-	{
-		std::string m_id;
-		std::string m_parentId;
-
-		uint64_t m_seqNum;
-
-		ItemFields_t m_fields;
-	};
-
 	class DB
 	{
 		const std::string m_dbPrefix;
+		const std::string m_svcPrefix;
 		const std::shared_ptr<mongo::DBClientConnection> m_conn;
 	public:
 		DB (const std::string&);
@@ -65,7 +55,9 @@ namespace Laretz
 		boost::optional<Item> loadItem (const std::string& id);
 
 		void addItem (const Item&);
-		void modifyItem (const std::string& id, const ItemFields_t& newValues);
+		void modifyItem (const Item&);
 		void removeItem (const std::string& id);
+	private:
+		std::string getNamespace (const std::string&) const;
 	};
 }

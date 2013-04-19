@@ -32,7 +32,8 @@
 namespace Laretz
 {
 	DB::DB (const std::string& m_dbName)
-	: m_dbPrefix (m_dbName + '.')
+	: m_dbPrefix ("user_" + m_dbName + '.')
+	, m_svcPrefix ("service_" + m_dbName + '.')
 	, m_conn (new mongo::DBClientConnection)
 	{
 		m_conn->connect ("localhost");
@@ -40,9 +41,43 @@ namespace Laretz
 
 	std::unordered_set<std::string> DB::enumerateItems (uint64_t after, const std::string& parent) const
 	{
+		auto cursor = m_conn->query (getNamespace (parent),
+				QUERY ("seq" << mongo::GT << boost::lexical_cast<std::string> (after) << "parent" << parent));
+
+		std::unordered_set<std::string> result;
+		while (cursor->more ())
+			result.insert (cursor->next ().getStringField ("id"));
+		return result;
 	}
 
 	boost::optional<Item> DB::loadItem (const std::string& id)
 	{
+		auto idCursor = m_conn->query (m_svcPrefix + "id2parent", QUERY ("id" << id));
+		if (!idCursor->more ())
+			return {};
+
+		const auto& parentId = idCursor->next ().getStringField ("parentId");
+
+		auto cursor = m_conn->query (getNamespace (parentId), QUERY ("id" << id));
+		if (!idCursor->more ())
+			return {};
+
+		const auto& obj = cursor->next ();
+		Item item { id, parentId, obj.getIntField ("seq") };
+
+		std::set<std::string> fieldNames;
+		obj.getFieldNames (fieldNames);
+		for (auto knownField : { "id", "parentId", "seq" })
+			fieldNames.erase (knownField);
+
+		for (const auto& fieldName : fieldNames)
+			item.setField (fieldName, obj [fieldName]);
+
+		return item;
+	}
+
+	std::string DB::getNamespace (const std::string& parentId) const
+	{
+		return m_dbPrefix + (parentId.empty () ? parentId : "root");
 	}
 }
