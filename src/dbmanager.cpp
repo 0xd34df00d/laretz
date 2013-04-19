@@ -44,7 +44,7 @@ namespace Laretz
 			throw std::runtime_error ("unknown login or incorrect password");
 
 		auto obj = cursor->next ();
-		const auto& dbName = obj.getStringField ("db");
+		const std::string dbName { obj.getStringField ("db") };
 
 		return DB_ptr (new DB (dbName));
 	}

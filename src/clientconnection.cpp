@@ -36,6 +36,7 @@
 #include "packetgenerator.h"
 #include "operation.h"
 #include "dbmanager.h"
+#include "dboperator.h"
 
 namespace
 {
@@ -151,12 +152,26 @@ namespace Laretz
 			writeErrorResponse (std::string ("unable to get database: ") + e.what ());
 			return;
 		}
+
+		try
+		{
+			PacketGenerator pg { { { "ReplyType", "Success" } } };
+			pg << DBOperator { db } (ops);
+
+			auto shared = shared_from_this ();
+			boost::asio::async_write (m_socket,
+					boost::asio::buffer (pg ()),
+					[shared] (const boost::system::error_code&, std::size_t) {});
+		}
+		catch (const std::exception& e)
+		{
+			writeErrorResponse (e.what ());
+		}
 	}
 
 	void ClientConnection::writeErrorResponse (const std::string& reason)
 	{
-		PacketGenerator pg ({ { "ReplyType", "Error" }, { "Reason", reason } });
-		const auto& data = pg ();
+		const auto& data = PacketGenerator { { { "ReplyType", "Error" }, { "Reason", reason } } } ();
 		auto shared = shared_from_this ();
 		boost::asio::async_write (m_socket,
 				boost::asio::buffer (data),
