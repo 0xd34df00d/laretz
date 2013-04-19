@@ -32,7 +32,21 @@ namespace Laretz
 {
 	Operation::Operation ()
 	: m_type (OpType::Modify)
-	, m_seq (0)
 	{
+	}
+
+	OpType Operation::getType () const
+	{
+		return m_type;
+	}
+
+	const Item& Operation::getItem () const
+	{
+		return m_item;
+	}
+
+	void Operation::setItem (const Item& item)
+	{
+		m_item = item;
 	}
 }

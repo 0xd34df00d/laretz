@@ -28,42 +28,76 @@
 
 #pragma once
 
+#include <map>
+#include <string>
+#include <vector>
+#include <boost/variant.hpp>
 #include <boost/serialization/access.hpp>
-#include "item.h"
+
+namespace mongo
+{
+	class BSONElement;
+}
 
 namespace Laretz
 {
-	enum class OpType
-	{
-		Append,
-		Delete,
-		Modify,
+	typedef boost::variant<std::vector<char>,
+			std::string,
+			int32_t,
+			double> Field_t;
 
-		List,
-		Fetch
+	class ShortItem
+	{
+		std::string m_id;
+	public:
+		ShortItem ();
+		explicit ShortItem (std::string&&);
+		explicit ShortItem (const std::string&);
+
+		friend class boost::serialization::access;
+
+		template<typename Ar>
+		void serialize (Ar& ar, const size_t)
+		{
+			ar & m_id;
+		}
 	};
 
-
-	class Operation
+	class Item
 	{
-		OpType m_type;
+		std::string m_id;
+		std::string m_parentId;
 
-		Item m_item;
+		std::map<std::string, Field_t> m_fields;
+
+		uint64_t m_seq;
 
 		friend class boost::serialization::access;
 	public:
-		Operation ();
+		Item ();
+		Item (const std::string& id, const std::string& parentId, uint64_t seq);
 
-		OpType getType () const;
+		std::string getId () const;
+		void setId (const std::string&);
 
-		const Item& getItem () const;
-		void setItem (const Item&);
+		std::string getParentId () const;
+		void setParentId (const std::string&);
+
+		uint64_t getSeq () const;
+		void setSeq (uint64_t);
+
+		Field_t operator[] (const std::string&) const;
+		Field_t& operator[] (const std::string&);
+
+		void setField (const std::string&, const mongo::BSONElement&);
 	private:
 		template<typename Ar>
 		void serialize (Ar& ar, const size_t)
 		{
-			ar & m_type;
-			ar & m_item;
+			ar & m_id;
+			ar & m_parentId;
+			ar & m_fields;
+			ar & m_seq;
 		}
 	};
 }
