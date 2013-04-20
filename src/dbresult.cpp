@@ -31,12 +31,19 @@
 namespace Laretz
 {
 	DBResult::DBResult ()
+	: m_curSeq (0)
 	{
 	}
 
 	DBResult::DBResult (const ResultSet_t& set)
 	: m_result (set)
+	, m_curSeq (0)
 	{
+	}
+
+	void DBResult::setCurSeq (uint64_t seq)
+	{
+		m_curSeq = seq;
 	}
 
 	namespace

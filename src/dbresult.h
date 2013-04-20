@@ -39,11 +39,14 @@ namespace Laretz
 	class DBResult
 	{
 		ResultSet_t m_result;
+		uint64_t m_curSeq;
 
 		friend class boost::serialization::access;
 	public:
 		DBResult ();
 		DBResult (const ResultSet_t&);
+
+		void setCurSeq (uint64_t);
 
 		DBResult& operator<< (const ResultSet_t&);
 	private:
@@ -51,6 +54,7 @@ namespace Laretz
 		void serialize (Ar& ar, const size_t)
 		{
 			ar & m_result;
+			ar & m_curSeq;
 		}
 	};
 }
