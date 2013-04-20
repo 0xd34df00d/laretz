@@ -75,6 +75,7 @@ namespace Laretz
 		FieldMap_t m_fields;
 
 		uint64_t m_seq;
+		uint64_t m_childrenSeq;
 
 		friend class boost::serialization::access;
 	public:
@@ -83,7 +84,7 @@ namespace Laretz
 		typedef FieldMap_t::value_type value_type;
 
 		Item ();
-		Item (const std::string& id, const std::string& parentId, uint64_t seq);
+		Item (const std::string& id, const std::string& parentId, uint64_t seq, uint64_t childrenSeq);
 
 		std::string getId () const;
 		void setId (const std::string&);
@@ -93,6 +94,9 @@ namespace Laretz
 
 		uint64_t getSeq () const;
 		void setSeq (uint64_t);
+
+		uint64_t getChildrenSeq () const;
+		void setChildrenSeq (uint64_t);
 
 		Field_t operator[] (const std::string&) const;
 		Field_t& operator[] (const std::string&);
@@ -111,6 +115,7 @@ namespace Laretz
 			ar & m_parentId;
 			ar & m_fields;
 			ar & m_seq;
+			ar & m_childrenSeq;
 		}
 	};
 

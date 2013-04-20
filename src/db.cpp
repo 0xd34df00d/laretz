@@ -90,11 +90,17 @@ namespace Laretz
 			return {};
 
 		const auto& obj = cursor->next ();
-		Item item { id, *parentId, static_cast<uint64_t> (obj ["seq"].Long ()) };
+		Item item
+		{
+			id,
+			*parentId,
+			static_cast<uint64_t> (obj ["seq"].Long ()),
+			static_cast<uint64_t> (obj ["childrenSeq"].Long ())
+		};
 
 		std::set<std::string> fieldNames;
 		obj.getFieldNames (fieldNames);
-		for (auto knownField : { "id", "parentId", "seq" })
+		for (auto knownField : { "id", "parentId", "seq", "childrenSeq" })
 			fieldNames.erase (knownField);
 
 		for (const auto& fieldName : fieldNames)
@@ -125,7 +131,7 @@ namespace Laretz
 		return idCursor->next ().getIntField ("value");
 	}
 
-	void DB::incSeqNum (const std::string& id)
+	uint64_t DB::incSeqNum (const std::string& id)
 	{
 		const auto& parentId = getParentId (id);
 		if (!parentId)
@@ -138,39 +144,45 @@ namespace Laretz
 		m_conn->update (m_svcPrefix + "state",
 				QUERY ("id" << "lastSeq"),
 				BSON ("value" << static_cast<long long> (newSeq)));
+
+		setChildSeqNum (*parentId, newSeq);
+		return newSeq;
 	}
 
-	void DB::addItem (Item item)
+	uint64_t DB::addItem (Item item)
 	{
-		const auto& parentSeq = getSeqNum (item.getParentId ());
-		item.setSeq (parentSeq + 1);
+		const auto& newSeq = getSeqNum () + 1;
+		item.setSeq (newSeq);
 		m_conn->insert (getNamespace (item.getParentId ()), toBSON (item));
 		m_conn->insert (m_svcPrefix + "id2parent",
 				BSON ("id" << item.getId ()
 					<< "parentId" << item.getParentId ()));
-		incSeqNum (item.getParentId ());
+
+		setChildSeqNum (item.getParentId (), newSeq);
+		return newSeq;
 	}
 
-	void DB::modifyItem (const Item& item)
+	uint64_t DB::modifyItem (const Item& item)
 	{
 		m_conn->update (getNamespace (item.getParentId ()),
 				QUERY ("id" << item.getId ()),
 				toBSON (item));
-		incSeqNum (item.getId ());
+		const auto newSeq = incSeqNum (item.getId ());
+		setChildSeqNum (item.getParentId (), newSeq);
+		return newSeq;
 	}
 
-	void DB::removeItem (const std::string& id)
+	uint64_t DB::removeItem (const std::string& id)
 	{
 		const auto& parent = getParentId (id);
 		if (!parent)
-		{
 			throw std::runtime_error ("unable to find parent item for " + id + " on removal");
-			return;
-		}
 
 		m_conn->remove (getNamespace (*parent),
 				QUERY ("id" << id));
-		incSeqNum (*parent);
+		const auto newSeq = getSeqNum () + 1;
+		setChildSeqNum (*parent, newSeq);
+		return newSeq;
 	}
 
 	boost::optional<std::string> DB::getParentId (const std::string& id) const
@@ -185,5 +197,19 @@ namespace Laretz
 	std::string DB::getNamespace (const std::string& parentId) const
 	{
 		return m_dbPrefix + (parentId.empty () ? parentId : "root");
+	}
+
+	void DB::setChildSeqNum (const std::string& id, uint64_t newSeq)
+	{
+		if (id.empty ())
+			return;
+
+		auto parentId = getParentId (id);
+		if (!parentId)
+			throw std::runtime_error ("unable to increment seq counter");
+
+		m_conn->update (getNamespace (*parentId),
+				QUERY ("id" << id),
+				BSON ("seq" << static_cast<long long> (newSeq)));
 	}
 }

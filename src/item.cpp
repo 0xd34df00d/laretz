@@ -50,13 +50,15 @@ namespace Laretz
 
 	Item::Item ()
 	: m_seq (0)
+	, m_childrenSeq (0)
 	{
 	}
 
-	Item::Item (const std::string& id, const std::string& parentId, uint64_t seq)
+	Item::Item (const std::string& id, const std::string& parentId, uint64_t seq, uint64_t childrenSeq)
 	: m_id (id)
 	, m_parentId (parentId)
 	, m_seq (seq)
+	, m_childrenSeq (childrenSeq)
 	{
 	}
 
@@ -88,6 +90,16 @@ namespace Laretz
 	void Item::setSeq (uint64_t seq)
 	{
 		m_seq = seq;
+	}
+
+	uint64_t Item::getChildrenSeq () const
+	{
+		return m_childrenSeq;
+	}
+
+	void Item::setChildrenSeq (uint64_t seq)
+	{
+		m_childrenSeq = seq;
 	}
 
 	Field_t Item::operator[] (const std::string& name) const

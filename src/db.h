@@ -32,6 +32,7 @@
 #include <unordered_map>
 #include <string>
 #include <stdexcept>
+#include <mutex>
 #include <boost/optional.hpp>
 #include "operation.h"
 #include "item.h"
@@ -55,21 +56,27 @@ namespace Laretz
 		const std::string m_dbPrefix;
 		const std::string m_svcPrefix;
 		const std::shared_ptr<mongo::DBClientConnection> m_conn;
+
+		std::mutex m_mutex;
 	public:
 		DB (const std::string&);
+
+		std::mutex& getMutex ();
 
 		std::vector<ShortItem> enumerateItems (uint64_t after = 0, const std::string& parentId = std::string ()) const;
 		boost::optional<Item> loadItem (const std::string& id);
 
 		uint64_t getSeqNum (const std::string& id);
 		uint64_t getSeqNum ();
-		void incSeqNum (const std::string& id);
+		uint64_t incSeqNum (const std::string& id);
 
-		void addItem (Item);
-		void modifyItem (const Item&);
-		void removeItem (const std::string& id);
+		uint64_t addItem (Item);
+		uint64_t modifyItem (const Item&);
+		uint64_t removeItem (const std::string& id);
 	private:
 		boost::optional<std::string> getParentId (const std::string&) const;
 		std::string getNamespace (const std::string&) const;
+
+		void setChildSeqNum (const std::string& parentId, uint64_t);
 	};
 }
