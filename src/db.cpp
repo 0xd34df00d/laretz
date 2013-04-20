@@ -70,7 +70,7 @@ namespace Laretz
 			return {};
 
 		const auto& obj = cursor->next ();
-		Item item { id, *parentId, obj ["seq"].Long () };
+		Item item { id, *parentId, static_cast<uint64_t> (obj ["seq"].Long ()) };
 
 		std::set<std::string> fieldNames;
 		obj.getFieldNames (fieldNames);
@@ -110,11 +110,39 @@ namespace Laretz
 			incSeqNum (*parentId);
 	}
 
+	namespace
+	{
+		struct ToBSONVisitor : boost::static_visitor<void>
+		{
+			mongo::BSONObjBuilder &m_builder;
+			const std::string m_name;
+
+			ToBSONVisitor (mongo::BSONObjBuilder& builder, const std::string& name)
+			: m_builder (builder)
+			, m_name (name)
+			{
+			}
+
+			void operator() (const std::vector<char>& str) const
+			{
+				m_builder.append (m_name, str.data (), str.size ());
+			}
+
+			template<typename T>
+			void operator() (const T& t) const
+			{
+				m_builder.append (m_name, t);
+			}
+		};
+	}
+
 	void DB::addItem (const Item& item)
 	{
 		mongo::BSONObjBuilder builder;
 		builder << "id" << item.getId ();
 		builder << "parentId" << item.getParentId ();
+		for (const auto& pair : item)
+			boost::apply_visitor (ToBSONVisitor (builder, pair.first), pair.second);
 
 		m_conn->insert (getNamespace (item.getParentId ()), builder.obj ());
 
