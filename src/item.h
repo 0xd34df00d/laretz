@@ -68,12 +68,17 @@ namespace Laretz
 		std::string m_id;
 		std::string m_parentId;
 
-		std::map<std::string, Field_t> m_fields;
+		typedef std::map<std::string, Field_t> FieldMap_t;
+		FieldMap_t m_fields;
 
 		uint64_t m_seq;
 
 		friend class boost::serialization::access;
 	public:
+		typedef FieldMap_t::iterator iterator;
+		typedef FieldMap_t::const_iterator const_iterator;
+		typedef FieldMap_t::value_type value_type;
+
 		Item ();
 		Item (const std::string& id, const std::string& parentId, uint64_t seq);
 
@@ -90,6 +95,11 @@ namespace Laretz
 		Field_t& operator[] (const std::string&);
 
 		void setField (const std::string&, const mongo::BSONElement&);
+
+		iterator begin ();
+		const_iterator begin () const;
+		iterator end ();
+		const_iterator end () const;
 	private:
 		template<typename Ar>
 		void serialize (Ar& ar, const size_t)

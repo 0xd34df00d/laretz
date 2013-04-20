@@ -129,4 +129,24 @@ namespace Laretz
 		}
 		m_fields [name] = field;
 	}
+
+	auto Item::begin () -> iterator
+	{
+		return m_fields.begin ();
+	}
+
+	auto Item::begin () const -> const_iterator
+	{
+		return m_fields.begin ();
+	}
+
+	auto Item::end () -> iterator
+	{
+		return m_fields.end ();
+	}
+
+	auto Item::end () const -> const_iterator
+	{
+		return m_fields.end ();
+	}
 }
