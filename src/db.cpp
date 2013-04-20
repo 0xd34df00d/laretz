@@ -27,6 +27,7 @@
  **********************************************************************/
 
 #include "db.h"
+#include <unordered_set>
 #include <mongo/client/dbclient.h>
 
 namespace Laretz
@@ -115,57 +116,61 @@ namespace Laretz
 		return cursor->next () ["seq"].Long ();
 	}
 
+	uint64_t DB::getSeqNum ()
+	{
+		auto idCursor = m_conn->query (m_svcPrefix + "state", QUERY ("id" << "lastSeq"));
+		if (!idCursor->more ())
+			return 0;
+
+		return idCursor->next ().getIntField ("value");
+	}
+
 	void DB::incSeqNum (const std::string& id)
 	{
 		const auto& parentId = getParentId (id);
 		if (!parentId)
-			throw DBError ("cannot  sequence number: unknown parent id for " + id);
+			throw DBError ("cannot increment sequence number: unknown parent id for " + id);
 
+		const auto newSeq = getSeqNum () + 1;
 		m_conn->update (getNamespace (*parentId),
 				QUERY ("id" << id),
-				BSON ("$inc" << BSON ("seq" << 1)));
-
-		if (!parentId->empty ())
-			incSeqNum (*parentId);
+				BSON ("seq" << static_cast<long long> (newSeq)));
+		m_conn->update (m_svcPrefix + "state",
+				QUERY ("id" << "lastSeq"),
+				BSON ("value" << static_cast<long long> (newSeq)));
 	}
 
-	namespace
+	void DB::addItem (Item item)
 	{
-		struct ToBSONVisitor : boost::static_visitor<void>
-		{
-			mongo::BSONObjBuilder &m_builder;
-			const std::string m_name;
-
-			ToBSONVisitor (mongo::BSONObjBuilder& builder, const std::string& name)
-			: m_builder (builder)
-			, m_name (name)
-			{
-			}
-
-			void operator() (const std::vector<char>& str) const
-			{
-				m_builder.append (m_name, str.data (), str.size ());
-			}
-
-			template<typename T>
-			void operator() (const T& t) const
-			{
-				m_builder.append (m_name, t);
-			}
-		};
-	}
-
-	void DB::addItem (const Item& item)
-	{
-		mongo::BSONObjBuilder builder;
-		builder << "id" << item.getId ();
-		builder << "parentId" << item.getParentId ();
-		for (const auto& pair : item)
-			boost::apply_visitor (ToBSONVisitor (builder, pair.first), pair.second);
-
-		m_conn->insert (getNamespace (item.getParentId ()), builder.obj ());
-
+		const auto& parentSeq = getSeqNum (item.getParentId ());
+		item.setSeq (parentSeq + 1);
+		m_conn->insert (getNamespace (item.getParentId ()), toBSON (item));
+		m_conn->insert (m_svcPrefix + "id2parent",
+				BSON ("id" << item.getId ()
+					<< "parentId" << item.getParentId ()));
 		incSeqNum (item.getParentId ());
+	}
+
+	void DB::modifyItem (const Item& item)
+	{
+		m_conn->update (getNamespace (item.getParentId ()),
+				QUERY ("id" << item.getId ()),
+				toBSON (item));
+		incSeqNum (item.getId ());
+	}
+
+	void DB::removeItem (const std::string& id)
+	{
+		const auto& parent = getParentId (id);
+		if (!parent)
+		{
+			throw std::runtime_error ("unable to find parent item for " + id + " on removal");
+			return;
+		}
+
+		m_conn->remove (getNamespace (*parent),
+				QUERY ("id" << id));
+		incSeqNum (*parent);
 	}
 
 	boost::optional<std::string> DB::getParentId (const std::string& id) const
