@@ -82,12 +82,7 @@ namespace Laretz
 			return {};
 
 		const auto& reqItem = op.getItems ().front ();
-		const auto& items = m_db->enumerateItems (reqItem.getSeq (), reqItem.getParentId ());
-		std::vector<ShortItem> shorts;
-		shorts.reserve (items.size ());
-		for (const auto& item : items)
-			shorts.emplace_back (item);
-		return { { shorts } };
+		return { { m_db->enumerateItems (reqItem.getSeq (), reqItem.getParentId ()) } };
 	}
 
 	std::vector<DBResult> DBOperator::fetch (const Operation& op)
@@ -114,5 +109,12 @@ namespace Laretz
 		for (const auto& item : items)
 			m_db->addItem (item);
 		return {};
+	}
+
+	std::vector<DBResult> DBOperator::update (const Operation& op)
+	{
+		const auto& items = op.getItems ();
+		if (items.empty ())
+			return {};
 	}
 }

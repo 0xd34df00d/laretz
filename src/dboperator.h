@@ -73,5 +73,6 @@ namespace Laretz
 		std::vector<DBResult> list (const Operation&);
 		std::vector<DBResult> fetch (const Operation&);
 		std::vector<DBResult> append (const Operation&);
+		std::vector<DBResult> update (const Operation&);
 	};
 }
