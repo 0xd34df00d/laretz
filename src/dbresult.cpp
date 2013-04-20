@@ -46,6 +46,12 @@ namespace Laretz
 		m_curSeq = seq;
 	}
 
+	void DBResult::updateCurSeq (uint64_t seq)
+	{
+		if (seq > m_curSeq)
+			m_curSeq = seq;
+	}
+
 	namespace
 	{
 		struct AppendVisitor : public boost::static_visitor<void>

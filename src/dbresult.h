@@ -47,6 +47,7 @@ namespace Laretz
 		DBResult (const ResultSet_t&);
 
 		void setCurSeq (uint64_t);
+		void updateCurSeq (uint64_t);
 
 		DBResult& operator<< (const ResultSet_t&);
 	private:
