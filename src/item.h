@@ -37,6 +37,7 @@
 namespace mongo
 {
 	class BSONElement;
+	class BSONObj;
 }
 
 namespace Laretz
@@ -49,10 +50,11 @@ namespace Laretz
 	class ShortItem
 	{
 		std::string m_id;
+		uint64_t m_seqId;
 	public:
 		ShortItem ();
-		explicit ShortItem (std::string&&);
-		explicit ShortItem (const std::string&);
+		ShortItem (std::string&&, uint64_t);
+		ShortItem (const std::string&, uint64_t);
 
 		friend class boost::serialization::access;
 
@@ -60,6 +62,7 @@ namespace Laretz
 		void serialize (Ar& ar, const size_t)
 		{
 			ar & m_id;
+			ar & m_seqId;
 		}
 	};
 
