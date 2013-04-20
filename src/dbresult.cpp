@@ -38,4 +38,30 @@ namespace Laretz
 	: m_result (set)
 	{
 	}
+
+	namespace
+	{
+		struct AppendVisitor : public boost::static_visitor<void>
+		{
+			template<typename T>
+			void operator() (T& left, const T& right) const
+			{
+				std::copy (right.begin (), right.end (), std::back_inserter (left));
+			}
+
+			template<typename T, typename U>
+			void operator() (T&, const U&) const
+			{
+			}
+		};
+	}
+
+	DBResult& DBResult::operator<< (const ResultSet_t& other)
+	{
+		if (m_result.empty ())
+			m_result = other;
+		else
+			boost::apply_visitor (AppendVisitor (), m_result, other);
+		return *this;
+	}
 }

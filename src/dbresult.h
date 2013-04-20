@@ -44,6 +44,8 @@ namespace Laretz
 	public:
 		DBResult ();
 		DBResult (const ResultSet_t&);
+
+		DBResult& operator<< (const ResultSet_t&);
 	private:
 		template<typename Ar>
 		void serialize (Ar& ar, const size_t)
