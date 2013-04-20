@@ -55,7 +55,8 @@ namespace Laretz
 	, m_op2func {
 			{ OpType::List, [this] (const Operation& op) { return list (op); } },
 			{ OpType::Fetch, [this] (const Operation& op) { return fetch (op); } },
-			{ OpType::Append, [this] (const Operation& op) { return append (op); } }
+			{ OpType::Append, [this] (const Operation& op) { return append (op); } },
+			{ OpType::Modify, [this] (const Operation& op) { return update (op); } }
 		}
 	{
 	}
@@ -101,14 +102,21 @@ namespace Laretz
 		if (items.empty ())
 			return {};
 
-		const auto parentSeq = m_db->getSeqNum (items.front ().getParentId ());
-		if (parentSeq > items.front ().getSeq ())
-			throw DBOpError (DBOpError::ErrorCode::SeqOutdated,
-					"cannot insert new item: parent has newer modification");
-
 		for (const auto& item : items)
-			m_db->addItem (item);
-		return {};
+		{
+			const auto& parentItem = m_db->loadItem (item.getParentId ());
+			if (!parentItem)
+				throw DBOpError (DBOpError::ErrorCode::UnknownParent,
+						"cannot insert new item into unknown parent");
+
+			if (parentItem->getChildrenSeq () > item.getSeq ())
+				throw DBOpError (DBOpError::ErrorCode::SeqOutdated,
+						"cannot insert new item: parent has newer sequence id");
+		}
+		DBResult res;
+		for (const auto& item : items)
+			res.updateCurSeq (m_db->addItem (item));
+		return { res };
 	}
 
 	std::vector<DBResult> DBOperator::update (const Operation& op)
@@ -116,5 +124,20 @@ namespace Laretz
 		const auto& items = op.getItems ();
 		if (items.empty ())
 			return {};
+
+		for (const auto& item : items)
+			if (m_db->getSeqNum (item.getId ()) > item.getSeq ())
+				throw DBOpError (DBOpError::ErrorCode::SeqOutdated,
+						"cannot update item: stored item has newer sequence id; refetch and retry");
+
+		DBResult res;
+		for (const auto& item : items)
+			res.updateCurSeq (m_db->modifyItem (item));
+
+		return { res };
+	}
+
+	std::vector<DBResult> DBOperator::remove (const Operation& op)
+	{
 	}
 }

@@ -46,7 +46,8 @@ namespace Laretz
 	public:
 		enum ErrorCode
 		{
-			SeqOutdated = 100
+			SeqOutdated = 100,
+			UnknownParent
 		};
 	private:
 		ErrorCode m_ec;
@@ -74,5 +75,6 @@ namespace Laretz
 		std::vector<DBResult> fetch (const Operation&);
 		std::vector<DBResult> append (const Operation&);
 		std::vector<DBResult> update (const Operation&);
+		std::vector<DBResult> remove (const Operation&);
 	};
 }
