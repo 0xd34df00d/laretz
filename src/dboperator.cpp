@@ -139,5 +139,25 @@ namespace Laretz
 
 	std::vector<DBResult> DBOperator::remove (const Operation& op)
 	{
+		const auto& items = op.getItems ();
+		if (items.empty ())
+			return {};
+
+		for (const auto& item : items)
+		{
+			const auto& parentItem = m_db->loadItem (item.getParentId ());
+			if (!parentItem)
+				throw DBOpError (DBOpError::ErrorCode::UnknownParent,
+						"cannot insert new item into unknown parent");
+
+			if (parentItem->getChildrenSeq () > item.getSeq ())
+				throw DBOpError (DBOpError::ErrorCode::SeqOutdated,
+						"cannot insert new item: parent has newer sequence id");
+		}
+
+		DBResult res;
+		for (const auto& item : items)
+			res.updateCurSeq (m_db->removeItem (item.getId ()));
+		return { res };
 	}
 }
