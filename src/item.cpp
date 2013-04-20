@@ -149,4 +149,41 @@ namespace Laretz
 	{
 		return m_fields.end ();
 	}
+
+	namespace
+	{
+		struct ToBSONVisitor : boost::static_visitor<void>
+		{
+			mongo::BSONObjBuilder &m_builder;
+			const std::string m_name;
+
+			ToBSONVisitor (mongo::BSONObjBuilder& builder, const std::string& name)
+			: m_builder (builder)
+			, m_name (name)
+			{
+			}
+
+			void operator() (const std::vector<char>& str) const
+			{
+				m_builder.append (m_name, str.data (), str.size ());
+			}
+
+			template<typename T>
+			void operator() (const T& t) const
+			{
+				m_builder.append (m_name, t);
+			}
+		};
+	}
+
+	mongo::BSONObj toBSON (const Item& item)
+	{
+		mongo::BSONObjBuilder builder;
+		builder << "id" << item.getId ();
+		builder << "parentId" << item.getParentId ();
+		for (const auto& pair : item)
+			boost::apply_visitor (ToBSONVisitor (builder, pair.first), pair.second);
+
+		return builder.obj ();
+	}
 }

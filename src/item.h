@@ -110,4 +110,6 @@ namespace Laretz
 			ar & m_seq;
 		}
 	};
+
+	mongo::BSONObj toBSON (const Item&);
 }
