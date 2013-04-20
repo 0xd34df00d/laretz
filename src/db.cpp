@@ -96,6 +96,31 @@ namespace Laretz
 		return cursor->next () ["seq"].Long ();
 	}
 
+	void DB::incSeqNum (const std::string& id)
+	{
+		const auto& parentId = getParentId (id);
+		if (!parentId)
+			throw DBError ("cannot  sequence number: unknown parent id for " + id);
+
+		m_conn->update (getNamespace (*parentId),
+				QUERY ("id" << id),
+				BSON ("$inc" << BSON ("seq" << 1)));
+
+		if (!parentId->empty ())
+			incSeqNum (*parentId);
+	}
+
+	void DB::addItem (const Item& item)
+	{
+		mongo::BSONObjBuilder builder;
+		builder << "id" << item.getId ();
+		builder << "parentId" << item.getParentId ();
+
+		m_conn->insert (getNamespace (item.getParentId ()), builder.obj ());
+
+		incSeqNum (item.getParentId ());
+	}
+
 	boost::optional<std::string> DB::getParentId (const std::string& id) const
 	{
 		auto idCursor = m_conn->query (m_svcPrefix + "id2parent", QUERY ("id" << id));

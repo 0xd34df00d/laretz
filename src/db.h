@@ -63,6 +63,7 @@ namespace Laretz
 		boost::optional<Item> loadItem (const std::string& id);
 
 		uint64_t getSeqNum (const std::string& id);
+		void incSeqNum (const std::string& id);
 
 		void addItem (const Item&);
 		void modifyItem (const Item&);
