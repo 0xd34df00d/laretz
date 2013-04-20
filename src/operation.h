@@ -48,7 +48,7 @@ namespace Laretz
 	{
 		OpType m_type;
 
-		Item m_item;
+		std::vector<Item> m_items;
 
 		friend class boost::serialization::access;
 	public:
@@ -56,14 +56,14 @@ namespace Laretz
 
 		OpType getType () const;
 
-		const Item& getItem () const;
-		void setItem (const Item&);
+		const std::vector<Item>& getItems () const;
+		void setItems (const std::vector<Item>&);
 	private:
 		template<typename Ar>
 		void serialize (Ar& ar, const size_t)
 		{
 			ar & m_type;
-			ar & m_item;
+			ar & m_items;
 		}
 	};
 }

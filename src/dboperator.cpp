@@ -78,7 +78,10 @@ namespace Laretz
 
 	std::vector<DBResult> DBOperator::list (const Operation& op)
 	{
-		const auto& reqItem = op.getItem ();
+		if (op.getItems ().empty ())
+			return {};
+
+		const auto& reqItem = op.getItems ().front ();
 		const auto& items = m_db->enumerateItems (reqItem.getSeq (), reqItem.getParentId ());
 		std::vector<ShortItem> shorts;
 		shorts.reserve (items.size ());
@@ -89,15 +92,27 @@ namespace Laretz
 
 	std::vector<DBResult> DBOperator::fetch (const Operation& op)
 	{
-		if (const auto optItem = m_db->loadItem (op.getItem ().getId ()))
-			return { { { std::vector<Item> { *optItem } } } };
-		else
-			return {};
+		DBResult res;
+		for (const auto& item : op.getItems ())
+			if (const auto optItem = m_db->loadItem (item.getId ()))
+				res << ResultSet_t { std::vector<Item> { *optItem } };
+
+		return { res };
 	}
 
 	std::vector<DBResult> DBOperator::append (const Operation& op)
 	{
-		m_db->addItem (op.getItem ());
+		const auto& items = op.getItems ();
+		if (items.empty ())
+			return {};
+
+		const auto parentSeq = m_db->getSeqNum (items.front ().getParentId ());
+		if (parentSeq > items.front ().getSeq ())
+			throw DBOpError (DBOpError::ErrorCode::SeqOutdated,
+					"cannot insert new item: parent has newer modification");
+
+		for (const auto& item : items)
+			m_db->addItem (item);
 		return {};
 	}
 }

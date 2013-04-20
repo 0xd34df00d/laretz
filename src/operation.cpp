@@ -40,13 +40,13 @@ namespace Laretz
 		return m_type;
 	}
 
-	const Item& Operation::getItem () const
+	const std::vector<Item>& Operation::getItems () const
 	{
-		return m_item;
+		return m_items;
 	}
 
-	void Operation::setItem (const Item& item)
+	void Operation::setItems (const std::vector<Item>& item)
 	{
-		m_item = item;
+		m_items = item;
 	}
 }
