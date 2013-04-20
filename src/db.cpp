@@ -48,14 +48,33 @@ namespace Laretz
 		m_conn->connect ("localhost");
 	}
 
-	std::unordered_set<std::string> DB::enumerateItems (uint64_t after, const std::string& parent) const
+	std::vector<ShortItem> DB::enumerateItems (uint64_t after, const std::string& parent) const
 	{
-		auto cursor = m_conn->query (getNamespace (parent),
-				QUERY ("seq" << mongo::GT << boost::lexical_cast<std::string> (after) << "parent" << parent));
+		std::vector<ShortItem> result;
 
-		std::unordered_set<std::string> result;
-		while (cursor->more ())
-			result.insert (cursor->next ().getStringField ("id"));
+		auto drainParent = [&result, this, after] (const std::string& parent)
+		{
+			auto cursor = m_conn->query (getNamespace (parent),
+					QUERY ("seq" << mongo::GT << boost::lexical_cast<std::string> (after) << "parent" << parent));
+			while (cursor->more ())
+			{
+				const auto& obj = cursor->next ();
+				result.push_back ({ obj ["id"].String (), static_cast<uint64_t> (obj ["seq"].Long ()) });
+			}
+		};
+
+		if (!parent.empty ())
+			drainParent (parent);
+		else
+		{
+			auto idCursor = m_conn->query (m_svcPrefix + "id2parent");
+			std::unordered_set<std::string> knownParents;
+			while (idCursor->more ());
+				knownParents.insert (idCursor->next () ["parentId"].String ());
+
+			for (const auto& parent : knownParents)
+				drainParent (parent);
+		}
 		return result;
 	}
 

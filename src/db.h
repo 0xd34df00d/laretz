@@ -30,7 +30,6 @@
 
 #include <memory>
 #include <unordered_map>
-#include <unordered_set>
 #include <string>
 #include <stdexcept>
 #include <boost/optional.hpp>
@@ -59,7 +58,7 @@ namespace Laretz
 	public:
 		DB (const std::string&);
 
-		std::unordered_set<std::string> enumerateItems (uint64_t after = 0, const std::string& parentId = std::string ()) const;
+		std::vector<ShortItem> enumerateItems (uint64_t after = 0, const std::string& parentId = std::string ()) const;
 		boost::optional<Item> loadItem (const std::string& id);
 
 		uint64_t getSeqNum (const std::string& id);
