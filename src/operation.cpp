@@ -27,6 +27,7 @@
  **********************************************************************/
 
 #include "operation.h"
+#include <algorithm>
 
 namespace Laretz
 {
@@ -48,5 +49,18 @@ namespace Laretz
 	void Operation::setItems (const std::vector<Item>& item)
 	{
 		m_items = item;
+	}
+
+	Operation& Operation::operator+= (const Operation& op)
+	{
+		for (const auto& item : op.getItems ())
+		{
+			const auto pos = std::find_if (m_items.begin (), m_items.end (),
+					[&item] (const Item& it) { return it.getId () == item.getId (); });
+			if (pos == m_items.end ())
+				m_items.push_back (item);
+			else
+				*pos += item;
+		}
 	}
 }

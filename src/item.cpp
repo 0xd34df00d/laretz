@@ -165,6 +165,20 @@ namespace Laretz
 		return m_fields.end ();
 	}
 
+	Item& Item::operator+= (const Item& other)
+	{
+		if (m_id != other.m_id)
+			throw std::logic_error ("two different items are being added");
+
+		for (const auto& pair : other)
+			m_fields [pair.first] = pair.second;
+
+		m_seq = other.m_seq;
+		m_childrenSeq = other.m_childrenSeq;
+
+		return *this;
+	}
+
 	namespace
 	{
 		struct ToBSONVisitor : boost::static_visitor<void>

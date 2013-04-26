@@ -43,7 +43,6 @@ namespace Laretz
 		Fetch
 	};
 
-
 	class Operation
 	{
 		OpType m_type;
@@ -58,6 +57,8 @@ namespace Laretz
 
 		const std::vector<Item>& getItems () const;
 		void setItems (const std::vector<Item>&);
+
+		Operation& operator+= (const Operation&);
 	private:
 		template<typename Ar>
 		void serialize (Ar& ar, const size_t)

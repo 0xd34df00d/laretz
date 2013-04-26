@@ -107,6 +107,8 @@ namespace Laretz
 		const_iterator begin () const;
 		iterator end ();
 		const_iterator end () const;
+
+		Item& operator+= (const Item&);
 	private:
 		template<typename Ar>
 		void serialize (Ar& ar, const size_t)
