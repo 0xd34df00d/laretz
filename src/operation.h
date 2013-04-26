@@ -58,6 +58,11 @@ namespace Laretz
 		const std::vector<Item>& getItems () const;
 		void setItems (const std::vector<Item>&);
 
+		bool empty () const;
+
+		Operation& operator+= (const Item&);
+		Operation& operator-= (const Item&);
+
 		Operation& operator+= (const Operation&);
 	private:
 		template<typename Ar>

@@ -51,16 +51,38 @@ namespace Laretz
 		m_items = item;
 	}
 
+	bool Operation::empty () const
+	{
+		return m_items.empty ();
+	}
+
+	Operation& Operation::operator+= (const Item& item)
+	{
+		const auto pos = std::find_if (m_items.begin (), m_items.end (),
+				[&item] (const Item& it) { return it.getId () == item.getId (); });
+		if (pos == m_items.end ())
+			m_items.push_back (item);
+		else
+			*pos += item;
+
+		return *this;
+	}
+
+	Operation& Operation::operator-= (const Item& item)
+	{
+		const auto pos = std::find_if (m_items.begin (), m_items.end (),
+				[&item] (const Item& it) { return it.getId () == item.getId (); });
+		if (pos != m_items.end ())
+			m_items.erase (pos);
+
+		return *this;
+	}
+
 	Operation& Operation::operator+= (const Operation& op)
 	{
 		for (const auto& item : op.getItems ())
-		{
-			const auto pos = std::find_if (m_items.begin (), m_items.end (),
-					[&item] (const Item& it) { return it.getId () == item.getId (); });
-			if (pos == m_items.end ())
-				m_items.push_back (item);
-			else
-				*pos += item;
-		}
+			*this += item;
+
+		return *this;
 	}
 }
