@@ -10,7 +10,15 @@ SET (LIBOPS_SRCS
 	item.cpp
 	operation.cpp
 	dbresult.cpp
-	opsummer.cpp)
+	opsummer.cpp
+	)
+
+SET (LIBOPS_HEADERS
+	item.h
+	operation.h
+	dbresult.h
+	opsummer.h
+	)
 
 SET (SRCS
 	main.cpp
@@ -38,3 +46,7 @@ TARGET_LINK_LIBRARIES (laretz
 	${Boost_SYSTEM_LIBRARY}
 	${Boost_THREAD_LIBRARY}
 	)
+
+INSTALL (TARGETS laretz_ops DESTINATION "lib")
+INSTALL (TARGETS laretz DESTINATION "bin")
+INSTALL (FILES ${LIBOPS_HEADERS} DESTINATION "include/laretz/ops")
