@@ -59,9 +59,10 @@ namespace Laretz
 		void setItems (const std::vector<Item>&);
 
 		bool empty () const;
+		bool contains (const std::string&) const;
 
 		Operation& operator+= (const Item&);
-		Operation& operator-= (const Item&);
+		bool operator-= (const Item&);
 
 		Operation& operator+= (const Operation&);
 	private:

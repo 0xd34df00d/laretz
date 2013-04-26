@@ -27,6 +27,7 @@
  **********************************************************************/
 
 #include "opsummer.h"
+#include <stdexcept>
 #include <unordered_set>
 #include "item.h"
 
@@ -37,31 +38,80 @@ namespace Laretz
 		switch (op.getType ())
 		{
 		case OpType::Append:
-		case OpType::Delete:
 			m_ops.push_back (op);
+			break;
+		case OpType::Delete:
+			mergeDeleted (op);
 			break;
 		case OpType::Modify:
 			mergeModified (op);
 			break;
+		case OpType::List:
+		case OpType::Fetch:
+			throw std::runtime_error ("OpSummer is for modify-only operations");
+			break;
 		}
+
+		return *this;
 	}
 
 	void OpSummer::mergeModified (Operation toAdd)
 	{
+		std::unordered_set<std::string> m_addedIds;
 		std::unordered_set<std::string> m_deletedIds;
 
-		for (const auto& op : m_ops)
+		for (auto& op : m_ops)
 		{
 			switch (op.getType ())
 			{
 			case OpType::Append:
+				for (const auto& item : op.getItems ())
+					m_addedIds.insert (item.getId ());
+
+				for (const auto& item : toAdd.getItems ())
+					if (op.contains (item.getId ()))
+					{
+						op += item;
+						toAdd -= item;
+					}
+				break;
 			case OpType::Delete:
 				for (const auto& item : op.getItems ())
 					m_deletedIds.insert (item.getId ());
 				break;
 			case OpType::Modify:
+				for (const auto& item : toAdd.getItems ())
+					if (m_deletedIds.find (item.getId ()) != m_deletedIds.end ())
+					{
+						op += item;
+						toAdd -= item;
+					}
+				break;
+			case OpType::List:
+			case OpType::Fetch:
 				break;
 			}
 		}
+
+		if (!toAdd.empty ())
+			m_ops.push_back (toAdd);
+	}
+
+	void OpSummer::mergeDeleted (Operation toDelete)
+	{
+		const auto srcOp = toDelete;
+
+		for (auto& op : m_ops)
+		{
+			if (op.getType () == OpType::Delete)
+				continue;
+
+			for (const auto& item : op.getItems ())
+				if ((op -= item) && op.getType () == OpType::Append)
+					toDelete -= item;
+		}
+
+		if (!toDelete.empty ())
+			m_ops.push_back (toDelete);
 	}
 }

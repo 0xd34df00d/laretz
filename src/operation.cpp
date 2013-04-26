@@ -56,6 +56,12 @@ namespace Laretz
 		return m_items.empty ();
 	}
 
+	bool Operation::contains (const std::string& id) const
+	{
+		return std::find_if (m_items.begin (), m_items.end (),
+				[&id] (const Item& item) { return item.getId () == id; }) != m_items.end ();
+	}
+
 	Operation& Operation::operator+= (const Item& item)
 	{
 		const auto pos = std::find_if (m_items.begin (), m_items.end (),
@@ -68,14 +74,16 @@ namespace Laretz
 		return *this;
 	}
 
-	Operation& Operation::operator-= (const Item& item)
+	bool Operation::operator-= (const Item& item)
 	{
 		const auto pos = std::find_if (m_items.begin (), m_items.end (),
 				[&item] (const Item& it) { return it.getId () == item.getId (); });
-		if (pos != m_items.end ())
+
+		const bool del = pos != m_items.end ();
+		if (del)
 			m_items.erase (pos);
 
-		return *this;
+		return del;
 	}
 
 	Operation& Operation::operator+= (const Operation& op)

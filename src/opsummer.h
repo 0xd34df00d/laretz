@@ -39,5 +39,6 @@ namespace Laretz
 		OpSummer& operator<< (const Operation&);
 	private:
 		void mergeModified (Operation);
+		void mergeDeleted (Operation);
 	};
 }
