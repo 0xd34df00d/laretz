@@ -36,9 +36,20 @@ namespace Laretz
 	{
 	}
 
+	Operation::Operation (OpType op, const std::vector<Item>& items)
+	: m_type (op)
+	, m_items (items)
+	{
+	}
+
 	OpType Operation::getType () const
 	{
 		return m_type;
+	}
+
+	void Operation::setType (OpType type)
+	{
+		m_type = type;
 	}
 
 	const std::vector<Item>& Operation::getItems () const

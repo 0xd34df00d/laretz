@@ -52,8 +52,10 @@ namespace Laretz
 		friend class boost::serialization::access;
 	public:
 		Operation ();
+		Operation (OpType op, const std::vector<Item>& items);
 
 		OpType getType () const;
+		void setType (OpType);
 
 		const std::vector<Item>& getItems () const;
 		void setItems (const std::vector<Item>&);
