@@ -47,7 +47,8 @@ namespace Laretz
 		enum ErrorCode
 		{
 			SeqOutdated = 100,
-			UnknownParent
+			UnknownParent,
+			InvalidSemantics
 		};
 	private:
 		ErrorCode m_ec;
