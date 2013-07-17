@@ -101,8 +101,6 @@ namespace Laretz
 		Field_t operator[] (const std::string&) const;
 		Field_t& operator[] (const std::string&);
 
-		void setField (const std::string&, const mongo::BSONElement&);
-
 		iterator begin ();
 		const_iterator begin () const;
 		iterator end ();

@@ -113,38 +113,6 @@ namespace Laretz
 		return m_fields [name];
 	}
 
-	void Item::setField (const std::string& name, const mongo::BSONElement& elem)
-	{
-		Field_t field;
-		switch (elem.type ())
-		{
-		case mongo::BSONType::NumberDouble:
-			field = elem.Double ();
-			break;
-		case mongo::BSONType::NumberInt:
-			field = static_cast<int32_t> (elem.Int ());
-			break;
-		case mongo::BSONType::String:
-			field = elem.String ();
-			break;
-		case mongo::BSONType::BinData:
-		{
-			int length = 0;
-			const char *data = elem.binData (length);
-			std::vector<char> vec;
-			vec.reserve (length);
-			std::copy (data, data + length, std::back_inserter (vec));
-			field = vec;
-		}
-		default:
-		{
-			const auto& numStr = boost::lexical_cast<std::string> (elem.type ());
-			throw std::runtime_error ("unknown field data type" + numStr);
-		}
-		}
-		m_fields [name] = field;
-	}
-
 	auto Item::begin () -> iterator
 	{
 		return m_fields.begin ();
