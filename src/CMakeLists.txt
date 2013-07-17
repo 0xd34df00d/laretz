@@ -25,6 +25,7 @@ SET (SRCS
 	server.cpp
 	clientconnection.cpp
 	packetparser.cpp
+	itemmongo.cpp
 	db.cpp
 	dbmanager.cpp
 	packetgenerator.cpp

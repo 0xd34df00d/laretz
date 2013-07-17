@@ -29,6 +29,7 @@
 #include "db.h"
 #include <unordered_set>
 #include <mongo/client/dbclient.h>
+#include "itemmongo.h"
 
 namespace Laretz
 {

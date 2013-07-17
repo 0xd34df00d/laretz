@@ -34,12 +34,6 @@
 #include <boost/variant.hpp>
 #include <boost/serialization/access.hpp>
 
-namespace mongo
-{
-	class BSONElement;
-	class BSONObj;
-}
-
 namespace Laretz
 {
 	typedef boost::variant<std::vector<char>,
@@ -118,6 +112,4 @@ namespace Laretz
 			ar & m_childrenSeq;
 		}
 	};
-
-	mongo::BSONObj toBSON (const Item&);
 }
