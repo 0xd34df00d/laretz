@@ -1,1 +1,4 @@
 build/
+build.sync/
+.kdev4
+src.kdev4
