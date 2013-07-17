@@ -34,42 +34,64 @@
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/variant.hpp>
-#include "operation.h"
 
 namespace Laretz
 {
-	PacketParser::PacketParser ()
+	namespace
 	{
-	}
-
-	auto PacketParser::Parse (const std::string& data) const -> ParseResult_t
-	{
-		std::istringstream istr (data);
-
-		HeaderFields_t fields;
-		while (true)
+		HeaderFields_t ParseHeaders (std::istringstream& istr)
 		{
-			std::string field;
-			std::getline (istr, field);
-			boost::trim (field);
-			if (field.empty ())
-				break;
+			HeaderFields_t fields;
+			while (true)
+			{
+				std::string field;
+				std::getline (istr, field);
+				boost::trim (field);
+				if (field.empty ())
+					break;
 
-			std::vector<std::string> splitVec;
-			boost::split (splitVec, field, boost::is_any_of (":"));
-			for (auto& str : splitVec)
-				boost::trim (str);
+				std::vector<std::string> splitVec;
+				boost::split (splitVec, field, boost::is_any_of (":"));
+				for (auto& str : splitVec)
+					boost::trim (str);
 
-			if (splitVec.size () != 2)
-				continue;
+				if (splitVec.size () != 2)
+					continue;
 
-			fields.insert ({ splitVec [0], splitVec [1] });
+				fields.insert ({ splitVec [0], splitVec [1] });
+			}
+
+			return fields;
 		}
 
-		std::vector<Operation> op;
-		boost::archive::text_iarchive iars (istr);
-		iars >> op;
+		template<typename T, typename R>
+		R ParseImpl (const std::string& data)
+		{
+			std::istringstream istr (data);
 
-		return ParseResult_t (op, fields);
+			auto fields = ParseHeaders (istr);
+
+			std::vector<T> op;
+			boost::archive::text_iarchive iars (istr);
+			iars >> op;
+
+			return R { fields, op };
+		}
+	}
+
+	namespace Server
+	{
+		ParseResult Parse (const std::string& data)
+		{
+			return ParseImpl<Operation, ParseResult> (data);
+		}
+	}
+
+	namespace Client
+	{
+		ParseResult Parse (const std::string& data)
+		{
+			return ParseImpl<DBResult, ParseResult> (data);
+		}
 	}
 }

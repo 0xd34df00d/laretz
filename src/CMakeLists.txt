@@ -11,6 +11,7 @@ SET (LIBOPS_SRCS
 	operation.cpp
 	dbresult.cpp
 	opsummer.cpp
+	packetparser.cpp
 	)
 
 SET (LIBOPS_HEADERS
@@ -18,13 +19,13 @@ SET (LIBOPS_HEADERS
 	operation.h
 	dbresult.h
 	opsummer.h
+	packetparser.h
 	)
 
 SET (SRCS
 	main.cpp
 	server.cpp
 	clientconnection.cpp
-	packetparser.cpp
 	itemmongo.cpp
 	db.cpp
 	dbmanager.cpp

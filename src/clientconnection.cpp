@@ -125,11 +125,10 @@ namespace Laretz
 		m_buf.consume (bytesRead);
 		start ();
 
-		std::vector<Operation> ops;
-		std::map<std::string, std::string> fields;
+		Server::ParseResult result;
 		try
 		{
-			std::tie (ops, fields) = PacketParser ().Parse (data);
+			result = Server::Parse (data);
 		}
 		catch (const std::exception& e)
 		{
@@ -137,10 +136,10 @@ namespace Laretz
 			return;
 		}
 
-		auto getSafe = [&fields] (const std::string& name) -> std::string
+		auto getSafe = [&result] (const std::string& name) -> std::string
 		{
-			const auto pos = fields.find (name);
-			return pos == fields.end () ? std::string () : pos->second;
+			const auto pos = result.fields.find (name);
+			return pos == result.fields.end () ? std::string () : pos->second;
 		};
 		const auto& login = getSafe ("Login");
 		const auto& pass = getSafe ("Password");
@@ -159,7 +158,7 @@ namespace Laretz
 		try
 		{
 			PacketGenerator pg { { { "ReplyType", "Success" } } };
-			pg << DBOperator { db } (ops);
+			pg << DBOperator { db } (result.operations);
 
 			auto shared = shared_from_this ();
 			boost::asio::async_write (m_socket,

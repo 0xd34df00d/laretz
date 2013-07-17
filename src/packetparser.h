@@ -31,19 +31,36 @@
 #include <string>
 #include <map>
 #include <vector>
+#include "operation.h"
+#include "dbresult.h"
 
 namespace Laretz
 {
+	typedef std::map<std::string, std::string> HeaderFields_t;
+
 	class Operation;
 
-	class PacketParser
+	namespace Server
 	{
-	public:
-		typedef std::map<std::string, std::string> HeaderFields_t;
-		typedef std::tuple<std::vector<Operation>, HeaderFields_t> ParseResult_t;
+		struct ParseResult
+		{
+			HeaderFields_t fields;
+			std::vector<Operation> operations;
+		};
 
-		PacketParser ();
+		ParseResult Parse (const std::string&);
+	}
 
-		ParseResult_t Parse (const std::string&) const;
-	};
+	class DBResult;
+
+	namespace Client
+	{
+		struct ParseResult
+		{
+			HeaderFields_t fields;
+			std::vector<DBResult> operations;
+		};
+
+		ParseResult Parse (const std::string&);
+	}
 }
