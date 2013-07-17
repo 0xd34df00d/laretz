@@ -116,7 +116,10 @@ namespace Laretz
 	void ClientConnection::handleRead (const boost::system::error_code& ec, size_t bytesRead)
 	{
 		if (ec)
+		{
+			std::cerr << "error reading " << ec.message () << std::endl;
 			return;
+		}
 
 		const std::string data (asio::buffer_cast<const char*> (m_buf.data ()), bytesRead);
 		m_buf.consume (bytesRead);
