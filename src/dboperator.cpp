@@ -80,7 +80,8 @@ namespace Laretz
 	std::vector<DBResult> DBOperator::list (const Operation& op)
 	{
 		if (op.getItems ().empty ())
-			return {};
+			throw DBOpError (DBOpError::ErrorCode::InvalidSemantics,
+					"at least one item should be present for the list operation");
 
 		const auto& reqItem = op.getItems ().front ();
 		return { { m_db->enumerateItems (reqItem.getSeq (), reqItem.getParentId ()) } };
