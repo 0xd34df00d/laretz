@@ -72,7 +72,7 @@ namespace
 			}
 
 			const auto packetEnd = begin + m_expectedLength;
-			const auto hasFullPacket = packetEnd < end;
+			const auto hasFullPacket = packetEnd <= end;
 			return { hasFullPacket ? packetEnd : begin, hasFullPacket };
 		}
 	};
