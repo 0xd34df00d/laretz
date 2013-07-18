@@ -1,58 +1,9 @@
-CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
-PROJECT (laretz)
+cmake_minimum_required (VERSION 2.8)
+project (laretz)
 
-SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pthread")
+add_subdirectory (lib)
 
-FIND_PACKAGE (Boost REQUIRED filesystem serialization system thread)
-
-SET (LIBOPS_SRCS
-	item.cpp
-	operation.cpp
-	dbresult.cpp
-	opsummer.cpp
-	packetparser.cpp
-	packetgenerator.cpp
-	)
-
-SET (LIBOPS_HEADERS
-	item.h
-	operation.h
-	dbresult.h
-	opsummer.h
-	packetparser.h
-	packetgenerator.h
-	)
-
-SET (SRCS
-	main.cpp
-	server.cpp
-	clientconnection.cpp
-	itemmongo.cpp
-	db.cpp
-	dbmanager.cpp
-	dboperator.cpp
-	)
-
-ADD_LIBRARY (laretz_ops SHARED ${LIBOPS_SRCS})
-TARGET_LINK_LIBRARIES (laretz_ops
-	${Boost_SERIALIZATION_LIBRARY}
-	)
-
-ADD_EXECUTABLE (laretz WIN32
-	${SRCS}
-	)
-TARGET_LINK_LIBRARIES (laretz
-	laretz_ops
-	mongoclient
-	crypto
-	ssl
-	${Boost_FILESYSTEM_LIBRARY}
-	${Boost_SERIALIZATION_LIBRARY}
-	${Boost_SYSTEM_LIBRARY}
-	${Boost_THREAD_LIBRARY}
-	)
-
-INSTALL (TARGETS laretz_ops DESTINATION "lib")
-INSTALL (TARGETS laretz DESTINATION "bin")
-INSTALL (FILES ${LIBOPS_HEADERS} DESTINATION "include/laretz/ops")
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/lib)
+set (FULLBUILD TRUE)
+set (LARETZ_LIBRARIES "laretz_ops")
+add_subdirectory (server)
