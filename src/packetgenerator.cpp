@@ -27,61 +27,39 @@
  **********************************************************************/
 
 #include "packetgenerator.h"
-#include <sstream>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/variant.hpp>
+#include "dbresult.h"
+#include "operation.h"
 
 namespace Laretz
 {
-	PacketGenerator::PacketGenerator ()
-	{
-	}
-
-	PacketGenerator::PacketGenerator (std::map<std::string, std::string>&& fields)
-	: m_fields (fields)
-	{
-	}
-
-	PacketGenerator& PacketGenerator::operator<< (const std::pair<std::string, std::string>& field)
-	{
-		m_fields.insert (field);
-		return *this;
-	}
-
-	PacketGenerator& PacketGenerator::operator<< (const DBResult& op)
-	{
-		m_operations.push_back (op);
-		return *this;
-	}
-
-	PacketGenerator& PacketGenerator::operator<< (const std::vector<DBResult>& ops)
-	{
-		std::copy (ops.begin (), ops.end (), std::back_inserter (m_operations));
-		return *this;
-	}
-
-	std::string PacketGenerator::operator() () const
+	std::string detail::Serialize (const std::vector<DBResult>& vec)
 	{
 		std::string opsStr;
-		if (!m_operations.empty ())
+		if (!vec.empty ())
 		{
 			std::ostringstream ostr;
 			boost::archive::text_oarchive oars (ostr);
-			oars << m_operations;
+			oars << vec;
 			opsStr = ostr.str ();
 		}
+		return opsStr;
+	}
 
-		std::ostringstream ostr;
-		ostr << "Length: " << opsStr.size () << "\n";
-		for (const auto& field : m_fields)
-			ostr << field.first << ": " << field.second << "\n";
-		ostr << "\n";
-
-		ostr << opsStr;
-
-		return ostr.str ();
+	std::string detail::Serialize (const std::vector<Operation>& vec)
+	{
+		std::string opsStr;
+		if (!vec.empty ())
+		{
+			std::ostringstream ostr;
+			boost::archive::text_oarchive oars (ostr);
+			oars << vec;
+			opsStr = ostr.str ();
+		}
+		return opsStr;
 	}
 }

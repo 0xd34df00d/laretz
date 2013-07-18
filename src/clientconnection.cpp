@@ -157,8 +157,8 @@ namespace Laretz
 
 		try
 		{
-			PacketGenerator pg { { { "ReplyType", "Success" } } };
-			pg << DBOperator { db } (result.operations);
+			PacketGenerator<DBResult> pg { { { "ReplyType", "Success" } } };
+			pg [DBOperator { db } (result.operations)];
 
 			auto shared = shared_from_this ();
 			boost::asio::async_write (m_socket,
@@ -178,9 +178,9 @@ namespace Laretz
 	void ClientConnection::writeErrorResponse (const std::string& reason, int code)
 	{
 		std::cerr << "writing invalid " << code << " -> " << reason << std::endl;
-		PacketGenerator pg { { { "ReplyType", "Error" }, { "Reason", reason } } };
+		PacketGenerator<DBResult> pg { { { "ReplyType", "Error" }, { "Reason", reason } } };
 		if (code >= 0)
-			pg << std::make_pair ("ErrorCode", boost::lexical_cast<std::string> (code));
+			pg ({ "ErrorCode", boost::lexical_cast<std::string> (code) });
 		const auto& data = pg ();
 		auto shared = shared_from_this ();
 		boost::asio::async_write (m_socket,
