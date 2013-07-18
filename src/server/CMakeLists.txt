@@ -7,6 +7,7 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pthread")
 find_package (Boost REQUIRED filesystem serialization system thread)
 
 if (NOT FULLBUILD)
+	set (CMAKE_MODULE_PATH "/usr/local/share/apps/cmake/modules;/usr/share/apps/cmake/modules")
 	find_package (LibLaretz REQUIRED)
 endif ()
 
