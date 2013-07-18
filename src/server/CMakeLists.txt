@@ -7,7 +7,7 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pthread")
 find_package (Boost REQUIRED filesystem serialization system thread)
 
 if (NOT FULLBUILD)
-	find_package (LibLaretz)
+	find_package (LibLaretz REQUIRED)
 endif ()
 
 include_directories (${LARETZ_INCLUDE_DIRS})
