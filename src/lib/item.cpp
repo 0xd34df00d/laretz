@@ -31,26 +31,14 @@
 
 namespace Laretz
 {
-	ShortItem::ShortItem ()
-	: m_seqId (0)
-	{
-	}
-
-	ShortItem::ShortItem (std::string&& id, uint64_t seq)
-	: m_id (id)
-	, m_seqId (seq)
-	{
-	}
-
-	ShortItem::ShortItem (const std::string& id, uint64_t seq)
-	: m_id (id)
-	, m_seqId (seq)
-	{
-	}
-
 	Item::Item ()
 	: m_seq (0)
 	, m_childrenSeq (0)
+	{
+	}
+
+	Item::Item (const std::string& id, uint64_t seq)
+	: Item (id, {}, seq, 0)
 	{
 	}
 

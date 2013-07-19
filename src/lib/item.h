@@ -41,25 +41,6 @@ namespace Laretz
 			int32_t,
 			double> Field_t;
 
-	class ShortItem
-	{
-		std::string m_id;
-		uint64_t m_seqId;
-	public:
-		ShortItem ();
-		ShortItem (std::string&&, uint64_t);
-		ShortItem (const std::string&, uint64_t);
-
-		friend class boost::serialization::access;
-
-		template<typename Ar>
-		void serialize (Ar& ar, const size_t)
-		{
-			ar & m_id;
-			ar & m_seqId;
-		}
-	};
-
 	class Item
 	{
 		std::string m_id;
@@ -78,6 +59,7 @@ namespace Laretz
 		typedef FieldMap_t::value_type value_type;
 
 		Item ();
+		Item (const std::string& id, uint64_t seq);
 		Item (const std::string& id, const std::string& parentId, uint64_t seq, uint64_t childrenSeq);
 
 		std::string getId () const;

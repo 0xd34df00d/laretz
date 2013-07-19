@@ -9,7 +9,6 @@ find_package (Boost REQUIRED serialization)
 set (LIBOPS_SRCS
 	item.cpp
 	operation.cpp
-	dbresult.cpp
 	opsummer.cpp
 	packetparser.cpp
 	packetgenerator.cpp
@@ -18,7 +17,6 @@ set (LIBOPS_SRCS
 set (LIBOPS_HEADERS
 	item.h
 	operation.h
-	dbresult.h
 	opsummer.h
 	packetparser.h
 	packetgenerator.h

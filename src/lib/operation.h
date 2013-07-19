@@ -35,12 +35,16 @@ namespace Laretz
 {
 	enum class OpType
 	{
+		// Requests
 		Append,
 		Delete,
 		Modify,
 
 		List,
-		Fetch
+		Fetch,
+
+		// Only replies
+		Refetch
 	};
 
 	class Operation

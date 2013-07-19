@@ -125,10 +125,10 @@ namespace Laretz
 		m_buf.consume (bytesRead);
 		start ();
 
-		Server::ParseResult result;
+		ParseResult result;
 		try
 		{
-			result = Server::Parse (data);
+			result = Parse (data);
 		}
 		catch (const std::exception& e)
 		{
@@ -157,7 +157,7 @@ namespace Laretz
 
 		try
 		{
-			PacketGenerator<DBResult> pg { { { "ReplyType", "Success" } } };
+			PacketGenerator pg { { { "Status", "Success" } } };
 			pg [DBOperator { db } (result.operations)];
 
 			auto shared = shared_from_this ();
@@ -178,7 +178,7 @@ namespace Laretz
 	void ClientConnection::writeErrorResponse (const std::string& reason, int code)
 	{
 		std::cerr << "writing invalid " << code << " -> " << reason << std::endl;
-		PacketGenerator<DBResult> pg { { { "ReplyType", "Error" }, { "Reason", reason } } };
+		PacketGenerator pg { { { "Status", "Error" }, { "Reason", reason } } };
 		if (code >= 0)
 			pg ({ "ErrorCode", boost::lexical_cast<std::string> (code) });
 		const auto& data = pg ();

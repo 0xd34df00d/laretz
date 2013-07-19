@@ -35,61 +35,19 @@
 
 namespace Laretz
 {
-	class DBResult;
 	class Operation;
 
-	namespace detail
-	{
-		std::string Serialize (const std::vector<DBResult>&);
-		std::string Serialize (const std::vector<Operation>&);
-	}
-
-	template<typename OpsType>
 	class PacketGenerator
 	{
 		std::map<std::string, std::string> m_fields;
-		std::vector<OpsType> m_operations;
+		std::vector<Operation> m_operations;
 	public:
-		PacketGenerator ()
-		{
-		}
+		PacketGenerator ();
+		PacketGenerator (std::map<std::string, std::string>&& map);
 
-		PacketGenerator (std::map<std::string, std::string>&& map)
-		: m_fields (map)
-		{
-		}
-
-		PacketGenerator& operator() (const std::pair<std::string, std::string>& field)
-		{
-			m_fields.insert (field);
-			return *this;
-		}
-
-		PacketGenerator& operator() (const OpsType& op)
-		{
-			m_operations.push_back (op);
-			return *this;
-		}
-
-		PacketGenerator& operator[] (const std::vector<OpsType>& ops)
-		{
-			std::copy (ops.begin (), ops.end (), std::back_inserter (m_operations));
-			return *this;
-		}
-
-		std::string operator() () const
-		{
-			const auto& opsStr = detail::Serialize (m_operations);
-
-			std::ostringstream ostr;
-			ostr << "Length: " << opsStr.size () << "\n";
-			for (const auto& field : m_fields)
-				ostr << field.first << ": " << field.second << "\n";
-			ostr << "\n";
-
-			ostr << opsStr;
-
-			return ostr.str ();
-		}
+		PacketGenerator& operator() (const std::pair<std::string, std::string>& field);
+		PacketGenerator& operator() (const Operation& op);
+		PacketGenerator& operator[] (const std::vector<Operation>& ops);
+		std::string operator() () const;
 	};
 }

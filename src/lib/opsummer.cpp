@@ -48,7 +48,15 @@ namespace Laretz
 			break;
 		case OpType::List:
 		case OpType::Fetch:
-			throw std::runtime_error ("OpSummer is for modify-only operations");
+		case OpType::Refetch:
+			if (!m_ops.empty () &&
+					m_ops.front ().getType () != op.getType ())
+				throw std::runtime_error ("Cannot merge different readonly operations");
+
+			if (m_ops.empty ())
+				m_ops.push_back (op);
+			else
+				m_ops.front () += op;
 			break;
 		}
 
@@ -87,8 +95,7 @@ namespace Laretz
 						toAdd -= item;
 					}
 				break;
-			case OpType::List:
-			case OpType::Fetch:
+			default:
 				break;
 			}
 		}

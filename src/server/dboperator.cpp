@@ -30,7 +30,6 @@
 #include <boost/lexical_cast.hpp>
 #include "db.h"
 #include "operation.h"
-#include "dbresult.h"
 
 namespace Laretz
 {
@@ -61,9 +60,9 @@ namespace Laretz
 	{
 	}
 
-	std::vector<DBResult> DBOperator::operator() (const std::vector<Operation>& ops)
+	std::vector<Operation> DBOperator::operator() (const std::vector<Operation>& ops)
 	{
-		std::vector<DBResult> result;
+		std::vector<Operation> result;
 		for (const auto& op : ops)
 		{
 			const auto& opResult = apply (op);
@@ -72,93 +71,74 @@ namespace Laretz
 		return result;
 	}
 
-	std::vector<DBResult> DBOperator::apply (const Operation& op)
+	std::vector<Operation> DBOperator::apply (const Operation& op)
 	{
 		return m_op2func.find (op.getType ())->second (op);
 	}
 
-	std::vector<DBResult> DBOperator::list (const Operation& op)
+	std::vector<Operation> DBOperator::list (const Operation& op)
 	{
 		if (op.getItems ().empty ())
 			throw DBOpError (DBOpError::ErrorCode::InvalidSemantics,
 					"at least one item should be present for the list operation");
 
 		const auto& reqItem = op.getItems ().front ();
-		return { { m_db->enumerateItems (reqItem.getSeq (), reqItem.getParentId ()) } };
+		return { { OpType::List, m_db->enumerateItems (reqItem.getSeq (), reqItem.getParentId ()) } };
 	}
 
-	std::vector<DBResult> DBOperator::fetch (const Operation& op)
+	std::vector<Operation> DBOperator::fetch (const Operation& op)
 	{
-		DBResult res;
+		Operation res { OpType::Fetch, {} };
 		for (const auto& item : op.getItems ())
 			if (const auto optItem = m_db->loadItem (item.getId ()))
-				res << ResultSet_t { std::vector<Item> { *optItem } };
+				res += *optItem;
 
 		return { res };
 	}
 
-	std::vector<DBResult> DBOperator::append (const Operation& op)
+	std::vector<Operation> DBOperator::append (const Operation& op)
 	{
 		const auto& items = op.getItems ();
-		if (items.empty ())
-			return {};
 
+		std::vector<Item> outdated;
 		for (const auto& item : items)
 		{
 			const auto& parentItem = m_db->loadItem (item.getParentId ());
 			if (!parentItem)
 				throw DBOpError (DBOpError::ErrorCode::UnknownParent,
 						"cannot insert new item into unknown parent");
-
-			if (parentItem->getChildrenSeq () > item.getSeq ())
-				throw DBOpError (DBOpError::ErrorCode::SeqOutdated,
-						"cannot insert new item: parent has newer sequence id");
 		}
-		DBResult res;
-		for (const auto& item : items)
-			res.updateCurSeq (m_db->addItem (item));
-		return { res };
+
+		return doWithCheck (op, [] (DB_ptr db, Item item) { return db->addItem (item); });
 	}
 
-	std::vector<DBResult> DBOperator::update (const Operation& op)
+	std::vector<Operation> DBOperator::update (const Operation& op)
 	{
-		const auto& items = op.getItems ();
-		if (items.empty ())
-			return {};
-
-		for (const auto& item : items)
-			if (m_db->getSeqNum (item.getId ()) > item.getSeq ())
-				throw DBOpError (DBOpError::ErrorCode::SeqOutdated,
-						"cannot update item: stored item has newer sequence id; refetch and retry");
-
-		DBResult res;
-		for (const auto& item : items)
-			res.updateCurSeq (m_db->modifyItem (item));
-
-		return { res };
+		return doWithCheck (op, [] (DB_ptr db, Item item) { return db->modifyItem (item); });
 	}
 
-	std::vector<DBResult> DBOperator::remove (const Operation& op)
+	std::vector<Operation> DBOperator::remove (const Operation& op)
 	{
-		const auto& items = op.getItems ();
-		if (items.empty ())
-			return {};
+		return doWithCheck (op, [] (DB_ptr db, Item item) { return db->removeItem (item.getId ()); });
+	}
 
+	std::vector<Operation> DBOperator::doWithCheck (const Operation& op, std::function<uint64_t (DB_ptr, Item)> modifier)
+	{
+		auto items = op.getItems ();
+
+		std::vector<Item> outdated;
 		for (const auto& item : items)
 		{
-			const auto& parentItem = m_db->loadItem (item.getParentId ());
-			if (!parentItem)
-				throw DBOpError (DBOpError::ErrorCode::UnknownParent,
-						"cannot insert new item into unknown parent");
-
-			if (parentItem->getChildrenSeq () > item.getSeq ())
-				throw DBOpError (DBOpError::ErrorCode::SeqOutdated,
-						"cannot insert new item: parent has newer sequence id");
+			const auto dbSeq = m_db->getSeqNum (item.getId ());
+			if (dbSeq > item.getSeq ())
+				outdated.push_back ({ item.getId (), dbSeq });
 		}
 
-		DBResult res;
-		for (const auto& item : items)
-			res.updateCurSeq (m_db->removeItem (item.getId ()));
-		return { res };
+		if (!outdated.empty ())
+			return { { OpType::Refetch, outdated } };
+
+		for (auto& item : items)
+			item.setSeq (modifier (m_db, item));
+		return { { op.getType (), items } };
 	}
 }

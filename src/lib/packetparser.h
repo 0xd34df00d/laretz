@@ -32,7 +32,6 @@
 #include <map>
 #include <vector>
 #include "operation.h"
-#include "dbresult.h"
 
 namespace Laretz
 {
@@ -40,27 +39,11 @@ namespace Laretz
 
 	class Operation;
 
-	namespace Server
+	struct ParseResult
 	{
-		struct ParseResult
-		{
-			HeaderFields_t fields;
-			std::vector<Operation> operations;
-		};
+		HeaderFields_t fields;
+		std::vector<Operation> operations;
+	};
 
-		ParseResult Parse (const std::string&);
-	}
-
-	class DBResult;
-
-	namespace Client
-	{
-		struct ParseResult
-		{
-			HeaderFields_t fields;
-			std::vector<DBResult> operations;
-		};
-
-		ParseResult Parse (const std::string&);
-	}
+	ParseResult Parse (const std::string&);
 }

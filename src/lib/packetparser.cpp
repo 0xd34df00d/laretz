@@ -63,35 +63,18 @@ namespace Laretz
 
 			return fields;
 		}
-
-		template<typename T, typename R>
-		R ParseImpl (const std::string& data)
-		{
-			std::istringstream istr (data);
-
-			auto fields = ParseHeaders (istr);
-
-			std::vector<T> op;
-			boost::archive::text_iarchive iars (istr);
-			iars >> op;
-
-			return R { fields, op };
-		}
 	}
 
-	namespace Server
+	ParseResult Parse (const std::string& data)
 	{
-		ParseResult Parse (const std::string& data)
-		{
-			return ParseImpl<Operation, ParseResult> (data);
-		}
-	}
+		std::istringstream istr (data);
 
-	namespace Client
-	{
-		ParseResult Parse (const std::string& data)
-		{
-			return ParseImpl<DBResult, ParseResult> (data);
-		}
+		auto fields = ParseHeaders (istr);
+
+		std::vector<Operation> ops;
+		boost::archive::text_iarchive iars (istr);
+		iars >> ops;
+
+		return { fields, ops };
 	}
 }

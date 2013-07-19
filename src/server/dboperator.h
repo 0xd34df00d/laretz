@@ -36,8 +36,6 @@
 
 namespace Laretz
 {
-	class DBResult;
-
 	class DB;
 	typedef std::shared_ptr<DB> DB_ptr;
 
@@ -64,18 +62,21 @@ namespace Laretz
 	{
 		DB_ptr m_db;
 
-		const std::map<OpType, std::function<std::vector<DBResult> (Operation)>> m_op2func;
+		const std::map<OpType, std::function<std::vector<Operation> (Operation)>> m_op2func;
 	public:
 		DBOperator (DB_ptr);
 
-		std::vector<DBResult> operator() (const std::vector<Operation>&);
+		std::vector<Operation> operator() (const std::vector<Operation>&);
 	private:
-		std::vector<DBResult> apply (const Operation&);
+		std::vector<Operation> apply (const Operation&);
 
-		std::vector<DBResult> list (const Operation&);
-		std::vector<DBResult> fetch (const Operation&);
-		std::vector<DBResult> append (const Operation&);
-		std::vector<DBResult> update (const Operation&);
-		std::vector<DBResult> remove (const Operation&);
+		std::vector<Operation> list (const Operation&);
+		std::vector<Operation> fetch (const Operation&);
+		std::vector<Operation> append (const Operation&);
+		std::vector<Operation> update (const Operation&);
+		std::vector<Operation> remove (const Operation&);
+
+		std::vector<Operation> doWithCheck (const Operation&,
+				std::function<uint64_t (DB_ptr, Item)> modifier);
 	};
 }

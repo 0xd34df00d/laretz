@@ -86,9 +86,9 @@ namespace Laretz
 		m_conn->connect ("localhost");
 	}
 
-	std::vector<ShortItem> DB::enumerateItems (uint64_t after, const std::string& parent) const
+	std::vector<Item> DB::enumerateItems (uint64_t after, const std::string& parent) const
 	{
-		std::vector<ShortItem> result;
+		std::vector<Item> result;
 
 		auto drainParent = [&result, this, after] (const std::string& parent)
 		{
