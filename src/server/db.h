@@ -66,6 +66,8 @@ namespace Laretz
 		std::vector<Item> enumerateItems (uint64_t after = 0, const std::string& parentId = std::string ()) const;
 		boost::optional<Item> loadItem (const std::string& id);
 
+		std::vector<Item> enumerateRemoved (uint64_t after = 0);
+
 		uint64_t getSeqNum (const std::string& id);
 		uint64_t getSeqNum ();
 		uint64_t incSeqNum (const std::string& id);

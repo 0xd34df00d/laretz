@@ -146,6 +146,21 @@ namespace Laretz
 		return item;
 	}
 
+	std::vector<Item> DB::enumerateRemoved (uint64_t after)
+	{
+		std::vector<Item> result;
+
+		auto cursor = m_conn->query (m_svcPrefix + "removed",
+				QUERY ("seq" << mongo::GT << boost::lexical_cast<std::string> (after)));
+		while (cursor->more ())
+		{
+			const auto& obj = cursor->next ();
+			result.push_back ({ obj ["id"].String (), static_cast<uint64_t> (obj ["seq"].Long ()) });
+		}
+
+		return result;
+	}
+
 	uint64_t DB::getSeqNum (const std::string& id)
 	{
 		const auto& parentId = getParentId (id);
@@ -219,6 +234,10 @@ namespace Laretz
 				QUERY ("id" << id));
 		const auto newSeq = getSeqNum () + 1;
 		setChildSeqNum (*parent, newSeq);
+
+		m_conn->remove (m_svcPrefix + "id2parent", QUERY ("id" << id));
+		m_conn->insert (m_svcPrefix + "removed", BSON ("id" << id << "seq" << static_cast<long long> (newSeq)));
+
 		return newSeq;
 	}
 
