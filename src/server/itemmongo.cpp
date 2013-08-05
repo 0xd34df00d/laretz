@@ -49,6 +49,11 @@ namespace Laretz
 				m_builder.append (m_name, str.data (), str.size ());
 			}
 
+			void operator() (int64_t num) const
+			{
+				m_builder.append (m_name, static_cast<long long int> (num));
+			}
+
 			template<typename T>
 			void operator() (const T& t) const
 			{

@@ -38,7 +38,7 @@ namespace Laretz
 {
 	typedef boost::variant<std::vector<char>,
 			std::string,
-			int32_t,
+			int64_t,
 			double> Field_t;
 
 	class Item

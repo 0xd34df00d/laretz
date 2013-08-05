@@ -53,7 +53,7 @@ namespace Laretz
 				field = elem.Double ();
 				break;
 			case mongo::BSONType::NumberInt:
-				field = static_cast<int32_t> (elem.Int ());
+				field = static_cast<int64_t> (elem.Int ());
 				break;
 			case mongo::BSONType::String:
 				field = elem.String ();
