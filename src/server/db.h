@@ -79,6 +79,8 @@ namespace Laretz
 		boost::optional<std::string> getParentId (const std::string&) const;
 		std::string getNamespace (const std::string&) const;
 
+		void drainParent (std::vector<Item>&, uint64_t, const std::string&) const;
+
 		void setChildSeqNum (const std::string& parentId, uint64_t);
 	};
 }

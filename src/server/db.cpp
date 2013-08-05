@@ -90,19 +90,8 @@ namespace Laretz
 	{
 		std::vector<Item> result;
 
-		auto drainParent = [&result, this, after] (const std::string& parent)
-		{
-			auto cursor = m_conn->query (getNamespace (parent),
-					QUERY ("seq" << mongo::GT << boost::lexical_cast<std::string> (after) << "parent" << parent));
-			while (cursor->more ())
-			{
-				const auto& obj = cursor->next ();
-				result.push_back ({ obj ["id"].String (), static_cast<uint64_t> (obj ["seq"].Long ()) });
-			}
-		};
-
 		if (!parent.empty ())
-			drainParent (parent);
+			drainParent (result, after, parent);
 		else
 		{
 			auto idCursor = m_conn->query (m_svcPrefix + "id2parent");
@@ -111,7 +100,7 @@ namespace Laretz
 				knownParents.insert (idCursor->next () ["parentId"].String ());
 
 			for (const auto& parent : knownParents)
-				drainParent (parent);
+				drainParent (result, after, parent);
 		}
 		return result;
 	}
@@ -253,6 +242,20 @@ namespace Laretz
 	std::string DB::getNamespace (const std::string& parentId) const
 	{
 		return m_dbPrefix + (parentId.empty () ? parentId : "root");
+	}
+
+	void DB::drainParent (std::vector<Item>& result, uint64_t after, const std::string& parent) const
+	{
+		auto cursor = m_conn->query (getNamespace (parent),
+				QUERY ("seq" << mongo::GT << boost::lexical_cast<std::string> (after) << "parent" << parent));
+		while (cursor->more ())
+		{
+			const auto& obj = cursor->next ();
+			const auto& id = obj ["id"].String ();
+			result.push_back ({ id, static_cast<uint64_t> (obj ["seq"].Long ()) });
+
+			drainParent (result, after, id);
+		}
 	}
 
 	void DB::setChildSeqNum (const std::string& id, uint64_t newSeq)
