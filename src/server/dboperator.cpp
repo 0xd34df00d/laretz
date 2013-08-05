@@ -73,7 +73,11 @@ namespace Laretz
 
 	std::vector<Operation> DBOperator::apply (const Operation& op)
 	{
-		return m_op2func.find (op.getType ())->second (op);
+		const auto pos = m_op2func.find (op.getType ());
+		if (pos != m_op2func.end ())
+			return pos->second (op);
+		else
+			return {};
 	}
 
 	std::vector<Operation> DBOperator::list (const Operation& op)
