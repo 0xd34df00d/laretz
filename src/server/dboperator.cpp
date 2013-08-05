@@ -87,7 +87,11 @@ namespace Laretz
 					"at least one item should be present for the list operation");
 
 		const auto& reqItem = op.getItems ().front ();
-		return { { OpType::List, m_db->enumerateItems (reqItem.getSeq (), reqItem.getParentId ()) } };
+		return
+		{
+			{ OpType::List, m_db->enumerateItems (reqItem.getSeq (), reqItem.getParentId ()) },
+			{ OpType::Delete, m_db->enumerateRemoved (reqItem.getSeq ()) },
+		};
 	}
 
 	std::vector<Operation> DBOperator::fetch (const Operation& op)
