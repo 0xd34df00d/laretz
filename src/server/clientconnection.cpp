@@ -178,9 +178,14 @@ namespace Laretz
 	void ClientConnection::writeErrorResponse (const std::string& reason, int code)
 	{
 		std::cerr << "writing invalid " << code << " -> " << reason << std::endl;
-		PacketGenerator pg { { { "Status", "Error" }, { "Reason", reason } } };
-		if (code >= 0)
-			pg ({ "ErrorCode", boost::lexical_cast<std::string> (code) });
+		PacketGenerator pg
+		{
+			{
+				{ "Status", "Error" },
+				{ "Reason", reason },
+				{ "ErrorCode", boost::lexical_cast<std::string> (code) }
+			}
+		};
 		const auto& data = pg ();
 		auto shared = shared_from_this ();
 		boost::asio::async_write (m_socket,
