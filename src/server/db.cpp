@@ -97,6 +97,10 @@ namespace Laretz
 	, m_conn (new mongo::DBClientConnection)
 	{
 		m_conn->connect ("localhost");
+
+		if (!m_conn->query (m_svcPrefix + "state", QUERY ("id" << "lastSeq"))->more ())
+			m_conn->insert (m_svcPrefix + "state",
+					BSON ("id" << "lastSeq" << "value" << static_cast<long long> (0)));
 	}
 
 	std::vector<Item> DB::enumerateItems (uint64_t after, const std::string& parent) const
