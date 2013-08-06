@@ -63,6 +63,11 @@ namespace Laretz
 		return *this;
 	}
 
+	const std::vector<Operation>& OpSummer::getOps () const
+	{
+		return m_ops;
+	}
+
 	void OpSummer::mergeModified (Operation toAdd)
 	{
 		std::unordered_set<std::string> m_addedIds;

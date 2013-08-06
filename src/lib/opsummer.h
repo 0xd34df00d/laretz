@@ -37,6 +37,8 @@ namespace Laretz
 		std::vector<Operation> m_ops;
 	public:
 		OpSummer& operator+= (const Operation&);
+
+		const std::vector<Operation>& getOps () const;
 	private:
 		void mergeModified (Operation);
 		void mergeDeleted (Operation);
