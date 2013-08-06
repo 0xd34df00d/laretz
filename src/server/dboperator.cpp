@@ -87,11 +87,18 @@ namespace Laretz
 					"at least one item should be present for the list operation");
 
 		const auto& reqItem = op.getItems ().front ();
-		return
+		try
 		{
-			{ OpType::List, m_db->enumerateItems (reqItem.getSeq (), reqItem.getParentId ()) },
-			{ OpType::Delete, m_db->enumerateRemoved (reqItem.getSeq ()) },
-		};
+			return
+			{
+				{ OpType::List, m_db->enumerateItems (reqItem.getSeq (), reqItem.getParentId ()) },
+				{ OpType::Delete, m_db->enumerateRemoved (reqItem.getSeq ()) },
+			};
+		}
+		catch (const UnknownParentError& e)
+		{
+			throw DBOpError (ErrorCode::UnknownParent, e.what ());
+		}
 	}
 
 	std::vector<Operation> DBOperator::fetch (const Operation& op)

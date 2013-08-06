@@ -91,7 +91,11 @@ namespace Laretz
 		std::vector<Item> result;
 
 		if (!parent.empty ())
+		{
+			if (!getParentId (parent))
+				throw UnknownParentError ("unknown parent for `" + parent + "`");
 			drainParent (result, after, parent);
+		}
 		else
 		{
 			auto idCursor = m_conn->query (m_svcPrefix + "id2parent");
