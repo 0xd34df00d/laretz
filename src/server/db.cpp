@@ -205,7 +205,8 @@ namespace Laretz
 				BSON ("seq" << static_cast<long long> (newSeq)));
 		m_conn->update (m_svcPrefix + "state",
 				QUERY ("id" << "lastSeq"),
-				BSON ("value" << static_cast<long long> (newSeq)));
+				BSON ("id" << "lastSeq"
+						<< "value" << static_cast<long long> (newSeq)));
 
 		setChildSeqNum (*parentId, newSeq);
 		return newSeq;
@@ -215,10 +216,18 @@ namespace Laretz
 	{
 		const auto& newSeq = getSeqNum () + 1;
 		item.setSeq (newSeq);
-		m_conn->insert (getNamespace (item.getParentId ()), toBSON (item));
+
+		const auto& ns = getNamespace (item.getParentId ());
+		std::cout << "adding " << item.getId () << " seq " << newSeq << " to " << ns << std::endl;
+
+		m_conn->insert (ns, toBSON (item, true));
 		m_conn->insert (m_svcPrefix + "id2parent",
 				BSON ("id" << item.getId ()
 					<< "parentId" << item.getParentId ()));
+		m_conn->update (m_svcPrefix + "state",
+				QUERY ("id" << "lastSeq"),
+				BSON ("id" << "lastSeq"
+						<< "value" << static_cast<long long> (newSeq)));
 
 		setChildSeqNum (item.getParentId (), newSeq);
 		return newSeq;
