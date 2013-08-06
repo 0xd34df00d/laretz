@@ -71,6 +71,6 @@ namespace Laretz
 		std::vector<Operation> remove (const Operation&);
 
 		std::vector<Operation> doWithCheck (const Operation&,
-				std::function<uint64_t (DB_ptr, Item)> modifier);
+				bool checkParent, std::function<uint64_t (DB_ptr, Item)> modifier);
 	};
 }

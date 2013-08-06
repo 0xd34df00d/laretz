@@ -113,41 +113,32 @@ namespace Laretz
 
 	std::vector<Operation> DBOperator::append (const Operation& op)
 	{
-		const auto& items = op.getItems ();
-
-		std::vector<Item> outdated;
-		for (const auto& item : items)
-		{
-			const auto& parentItem = m_db->loadItem (item.getParentId ());
-			if (!parentItem)
-				throw DBOpError (DBOpError::ErrorCode::UnknownParent,
-						"cannot insert new item into unknown parent");
-		}
-
-		return doWithCheck (op, [] (DB_ptr db, Item item) { return db->addItem (item); });
+		return doWithCheck (op, false, [] (DB_ptr db, Item item) { return db->addItem (item); });
 	}
 
 	std::vector<Operation> DBOperator::update (const Operation& op)
 	{
-		return doWithCheck (op, [] (DB_ptr db, Item item) { return db->modifyItem (item); });
+		return doWithCheck (op, true, [] (DB_ptr db, Item item) { return db->modifyItem (item); });
 	}
 
 	std::vector<Operation> DBOperator::remove (const Operation& op)
 	{
-		return doWithCheck (op, [] (DB_ptr db, Item item) { return db->removeItem (item.getId ()); });
+		return doWithCheck (op, false, [] (DB_ptr db, Item item) { return db->removeItem (item.getId ()); });
 	}
 
-	std::vector<Operation> DBOperator::doWithCheck (const Operation& op, std::function<uint64_t (DB_ptr, Item)> modifier)
+	std::vector<Operation> DBOperator::doWithCheck (const Operation& op,
+			bool check, std::function<uint64_t (DB_ptr, Item)> modifier)
 	{
 		auto items = op.getItems ();
 
 		std::vector<Item> outdated;
-		for (const auto& item : items)
-		{
-			const auto dbSeq = m_db->getSeqNum (item.getId ());
-			if (dbSeq > item.getSeq ())
-				outdated.push_back ({ item.getId (), dbSeq });
-		}
+		if (check)
+			for (const auto& item : items)
+			{
+				const auto dbSeq = m_db->getSeqNum (item.getId ());
+				if (dbSeq > item.getSeq ())
+					outdated.push_back ({ item.getId (), dbSeq });
+			}
 
 		if (!outdated.empty ())
 			return { { OpType::Refetch, outdated } };
