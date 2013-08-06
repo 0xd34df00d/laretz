@@ -48,7 +48,7 @@ namespace Laretz
 	{
 	public:
 		DBError (const std::string&);
-		~DBError () throw ();
+		~DBError () noexcept;
 	};
 
 	class DB

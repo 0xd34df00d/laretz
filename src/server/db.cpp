@@ -38,7 +38,7 @@ namespace Laretz
 	{
 	}
 
-	DBError::~DBError () throw ()
+	DBError::~DBError () noexcept
 	{
 	}
 
