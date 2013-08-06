@@ -37,6 +37,7 @@
 #include "operation.h"
 #include "dbmanager.h"
 #include "dboperator.h"
+#include "db.h"
 
 namespace
 {
@@ -117,7 +118,8 @@ namespace Laretz
 	{
 		if (ec)
 		{
-			std::cerr << "error reading " << ec.message () << std::endl;
+			if (ec.value () != boost::system::errc::no_such_file_or_directory)
+				std::cerr << "error reading " << ec.value () << "; " << ec.message () << std::endl;
 			return;
 		}
 
