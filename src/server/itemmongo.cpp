@@ -62,11 +62,15 @@ namespace Laretz
 		};
 	}
 
-	mongo::BSONObj toBSON (const Item& item)
+	mongo::BSONObj toBSON (const Item& item, bool withSeq)
 	{
 		mongo::BSONObjBuilder builder;
 		builder << "id" << item.getId ();
 		builder << "parentId" << item.getParentId ();
+
+		if (withSeq)
+			builder << "seq" << static_cast<long long> (item.getSeq ());
+
 		for (const auto& pair : item)
 			boost::apply_visitor (ToBSONVisitor (builder, pair.first), pair.second);
 

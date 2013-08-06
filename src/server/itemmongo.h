@@ -38,5 +38,5 @@ namespace mongo
 
 namespace Laretz
 {
-	mongo::BSONObj toBSON (const Item&);
+	mongo::BSONObj toBSON (const Item&, bool withSeq = false);
 }
