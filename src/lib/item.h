@@ -38,6 +38,7 @@ namespace Laretz
 {
 	typedef boost::variant<std::vector<char>,
 			std::string,
+			std::vector<std::string>,
 			int64_t,
 			double> Field_t;
 

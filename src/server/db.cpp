@@ -58,6 +58,19 @@ namespace Laretz
 			case mongo::BSONType::String:
 				field = elem.String ();
 				break;
+			case mongo::BSONType::Array:
+			{
+				const auto& arr = elem.Array ();
+				std::vector<std::string> strings;
+				for (const auto& elem : arr)
+				{
+					if (elem.type () != mongo::BSONType::String)
+						continue;
+					strings.push_back (elem.String ());
+				}
+				field = strings;
+				break;
+			}
 			case mongo::BSONType::BinData:
 			{
 				int length = 0;
