@@ -62,6 +62,7 @@ namespace Laretz
 		void setType (OpType);
 
 		const std::vector<Item>& getItems () const;
+		std::vector<Item>& getItems ();
 		void setItems (const std::vector<Item>&);
 
 		bool empty () const;

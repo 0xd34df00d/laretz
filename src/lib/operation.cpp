@@ -57,6 +57,11 @@ namespace Laretz
 		return m_items;
 	}
 
+	std::vector<Item>& Operation::getItems()
+	{
+		return m_items;
+	}
+
 	void Operation::setItems (const std::vector<Item>& item)
 	{
 		m_items = item;
