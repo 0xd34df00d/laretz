@@ -33,7 +33,7 @@
 
 namespace Laretz
 {
-	OpSummer& OpSummer::operator<< (const Operation& op)
+	OpSummer& OpSummer::operator+= (const Operation& op)
 	{
 		switch (op.getType ())
 		{
