@@ -51,6 +51,19 @@ namespace Laretz
 		~DBError () noexcept;
 	};
 
+	class UnknownParentError : public DBError
+	{
+	public:
+		UnknownParentError (const std::string& msg)
+		: DBError (msg)
+		{
+		}
+
+		~UnknownParentError () noexcept
+		{
+		}
+	};
+
 	class DB
 	{
 		const std::string m_dbPrefix;
