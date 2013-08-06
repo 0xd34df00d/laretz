@@ -44,7 +44,7 @@ namespace Laretz
 	{
 	}
 
-	DBOpError::ErrorCode DBOpError::getEC () const
+	ErrorCode DBOpError::getEC () const
 	{
 		return m_ec;
 	}
@@ -83,7 +83,7 @@ namespace Laretz
 	std::vector<Operation> DBOperator::list (const Operation& op)
 	{
 		if (op.getItems ().empty ())
-			throw DBOpError (DBOpError::ErrorCode::InvalidSemantics,
+			throw DBOpError (ErrorCode::InvalidSemantics,
 					"at least one item should be present for the list operation");
 
 		const auto& reqItem = op.getItems ().front ();

@@ -42,12 +42,6 @@ namespace Laretz
 	class DBOpError : public std::runtime_error
 	{
 	public:
-		enum ErrorCode
-		{
-			SeqOutdated = 100,
-			UnknownParent,
-			InvalidSemantics
-		};
 	private:
 		ErrorCode m_ec;
 		std::string m_reason;

@@ -47,6 +47,13 @@ namespace Laretz
 		Refetch
 	};
 
+	enum ErrorCode
+	{
+		SeqOutdated = 100,
+		UnknownParent,
+		InvalidSemantics
+	};
+
 	class Operation
 	{
 		OpType m_type;
