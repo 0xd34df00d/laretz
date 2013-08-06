@@ -258,7 +258,7 @@ namespace Laretz
 
 	std::string DB::getNamespace (const std::string& parentId) const
 	{
-		return m_dbPrefix + (parentId.empty () ? parentId : "root");
+		return m_dbPrefix + (!parentId.empty () ? parentId : "root");
 	}
 
 	void DB::drainParent (std::vector<Item>& result, uint64_t after, const std::string& parent) const
