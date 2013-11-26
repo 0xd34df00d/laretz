@@ -141,8 +141,7 @@ namespace Laretz
 		{
 			id,
 			*parentId,
-			static_cast<uint64_t> (obj ["seq"].Long ()),
-			static_cast<uint64_t> (obj ["childrenSeq"].Long ())
+			static_cast<uint64_t> (obj ["seq"].Long ())
 		};
 
 		std::set<std::string> fieldNames;
