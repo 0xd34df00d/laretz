@@ -146,7 +146,7 @@ namespace Laretz
 
 		std::set<std::string> fieldNames;
 		obj.getFieldNames (fieldNames);
-		for (auto knownField : { "id", "parentId", "seq", "childrenSeq" })
+		for (auto knownField : { "id", "parentId", "seq", "_id" })
 			fieldNames.erase (knownField);
 
 		for (const auto& fieldName : fieldNames)
