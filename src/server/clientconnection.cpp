@@ -72,9 +72,8 @@ namespace
 				begin += headerEnd + 2;
 			}
 
-			const auto packetEnd = begin + m_expectedLength;
-			const auto hasFullPacket = packetEnd <= end;
-			return { hasFullPacket ? packetEnd : begin, hasFullPacket };
+			const auto hasFullPacket = std::distance (begin, end) >= static_cast<ptrdiff_t> (m_expectedLength);
+			return { begin + (hasFullPacket ? m_expectedLength : 0), hasFullPacket };
 		}
 	};
 }
