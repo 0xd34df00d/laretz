@@ -55,6 +55,9 @@ namespace Laretz
 			case mongo::BSONType::NumberInt:
 				field = static_cast<int64_t> (elem.Int ());
 				break;
+			case mongo::BSONType::NumberLong:
+				field = static_cast<int64_t> (elem.Long ());
+				break;
 			case mongo::BSONType::String:
 				field = elem.String ();
 				break;
