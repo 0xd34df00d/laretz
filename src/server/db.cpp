@@ -279,7 +279,7 @@ namespace Laretz
 	void DB::drainParent (std::vector<Item>& result, uint64_t after, const std::string& parent) const
 	{
 		auto cursor = m_conn->query (getNamespace (parent),
-				QUERY ("seq" << mongo::GT << boost::lexical_cast<std::string> (after) << "parent" << parent));
+				QUERY ("seq" << mongo::GT << static_cast<long long> (after) << "parentId" << parent));
 		while (cursor->more ())
 		{
 			const auto& obj = cursor->next ();
