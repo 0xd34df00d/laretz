@@ -204,7 +204,7 @@ namespace Laretz
 		const auto newSeq = getSeqNum () + 1;
 		m_conn->update (getNamespace (*parentId),
 				QUERY ("id" << id),
-				BSON ("seq" << static_cast<long long> (newSeq)));
+				BSON ("$set" << BSON ("seq" << static_cast<long long> (newSeq))));
 		m_conn->update (m_svcPrefix + "state",
 				QUERY ("id" << "lastSeq"),
 				BSON ("id" << "lastSeq"
@@ -239,7 +239,7 @@ namespace Laretz
 	{
 		m_conn->update (getNamespace (item.getParentId ()),
 				QUERY ("id" << item.getId ()),
-				toBSON (item));
+				BSON ("$set" << toBSON (item)));
 		const auto newSeq = incSeqNum (item.getId ());
 		setChildSeqNum (item.getParentId (), newSeq);
 		return newSeq;
@@ -301,6 +301,6 @@ namespace Laretz
 
 		m_conn->update (getNamespace (*parentId),
 				QUERY ("id" << id),
-				BSON ("seq" << static_cast<long long> (newSeq)));
+				BSON ("$set" << BSON ("seq" << static_cast<long long> (newSeq))));
 	}
 }
