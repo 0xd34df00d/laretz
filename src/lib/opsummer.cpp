@@ -70,8 +70,8 @@ namespace Laretz
 
 	void OpSummer::mergeModified (Operation toAdd)
 	{
-		std::unordered_set<std::string> m_addedIds;
-		std::unordered_set<std::string> m_deletedIds;
+		std::unordered_set<std::string> addedIds;
+		std::unordered_set<std::string> deletedIds;
 
 		for (auto& op : m_ops)
 		{
@@ -79,7 +79,7 @@ namespace Laretz
 			{
 			case OpType::Append:
 				for (const auto& item : op.getItems ())
-					m_addedIds.insert (item.getId ());
+					addedIds.insert (item.getId ());
 
 				for (const auto& item : toAdd.getItems ())
 					if (op.contains (item.getId ()))
@@ -90,11 +90,11 @@ namespace Laretz
 				break;
 			case OpType::Delete:
 				for (const auto& item : op.getItems ())
-					m_deletedIds.insert (item.getId ());
+					deletedIds.insert (item.getId ());
 				break;
 			case OpType::Modify:
 				for (const auto& item : toAdd.getItems ())
-					if (m_deletedIds.find (item.getId ()) == m_deletedIds.end ())
+					if (deletedIds.find (item.getId ()) == deletedIds.end ())
 					{
 						op += item;
 						toAdd -= item;
