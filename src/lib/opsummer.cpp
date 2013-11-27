@@ -94,7 +94,7 @@ namespace Laretz
 				break;
 			case OpType::Modify:
 				for (const auto& item : toAdd.getItems ())
-					if (m_deletedIds.find (item.getId ()) != m_deletedIds.end ())
+					if (m_deletedIds.find (item.getId ()) == m_deletedIds.end ())
 					{
 						op += item;
 						toAdd -= item;
