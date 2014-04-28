@@ -118,7 +118,8 @@ namespace Laretz
 			if (op.getType () == OpType::Delete)
 				continue;
 
-			for (const auto& item : op.getItems ())
+			const auto items = op.getItems ();
+			for (const auto& item : items)
 				if ((op -= item) && op.getType () == OpType::Append)
 					toDelete -= item;
 		}
