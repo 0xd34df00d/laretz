@@ -23,10 +23,11 @@ set (LIBOPS_HEADERS
 	laretzversion.h
 	)
 
+include_directories(${Boost_INCLUDE_DIRS})
 add_library (laretz_ops SHARED ${LIBOPS_SRCS})
 target_link_libraries (laretz_ops
 	${Boost_SERIALIZATION_LIBRARY}
 	)
 install (TARGETS laretz_ops DESTINATION "lib")
 install (FILES ${LIBOPS_HEADERS} DESTINATION "include/laretz")
-install (FILES FindLibLaretz.cmake DESTINATION "share/apps/cmake/modules")
+install (FILES FindLibLaretz.cmake DESTINATION "${CMAKE_ROOT}/Modules")
