@@ -7,10 +7,13 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pthread")
 find_package (Boost REQUIRED filesystem serialization system thread)
 
 if (NOT FULLBUILD)
-	set (CMAKE_MODULE_PATH "/usr/local/share/apps/cmake/modules;/usr/share/apps/cmake/modules")
+	set (CMAKE_MODULE_PATH "/usr/local/share/apps/cmake/modules;/usr/share/apps/cmake/modules;${CMAKE_ROOT}/Modules")
 	find_package (LibLaretz REQUIRED)
 endif ()
 
+find_library(MONGOCLIENT NAMES libmongoclient.a mongoclient)
+
+include_directories(${Boost_INCLUDE_DIRS})
 include_directories (${LARETZ_INCLUDE_DIRS})
 
 set (SRCS
@@ -28,7 +31,7 @@ add_executable (laretz WIN32
 	)
 target_link_libraries (laretz
 	${LARETZ_LIBRARIES}
-	mongoclient
+	${MONGOCLIENT}
 	crypto
 	ssl
 	${Boost_FILESYSTEM_LIBRARY}
