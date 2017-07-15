@@ -35,4 +35,4 @@ endif ()
 
 install (TARGETS laretz_ops DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install (FILES ${LIBOPS_HEADERS} DESTINATION "include/laretz")
-install (FILES FindLibLaretz.cmake DESTINATION "${CMAKE_ROOT}/Modules")
+install (FILES FindLibLaretz.cmake DESTINATION "share/cmake/Modules")
