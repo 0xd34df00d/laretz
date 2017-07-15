@@ -3,7 +3,11 @@ project (laretz)
 
 add_subdirectory (lib)
 
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/lib)
-set (FULLBUILD TRUE)
-set (LARETZ_LIBRARIES "laretz_ops")
-add_subdirectory (server)
+option(WITH_SERVER "Build server component as well" OFF)
+
+if (WITH_SERVER)
+	include_directories (${CMAKE_CURRENT_SOURCE_DIR}/lib)
+	set (FULLBUILD TRUE)
+	set (LARETZ_LIBRARIES "laretz_ops")
+	add_subdirectory (server)
+endif ()
