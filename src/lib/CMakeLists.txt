@@ -32,6 +32,8 @@ target_link_libraries (laretz_ops
 	${Boost_SERIALIZATION_LIBRARY}
 	)
 
+include(GNUInstallDirs)
+
 if (NOT CMAKE_INSTALL_LIBDIR)
 	set (CMAKE_INSTALL_LIBDIR lib)
 endif ()
