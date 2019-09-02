@@ -1,7 +1,10 @@
 cmake_minimum_required (VERSION 2.8)
 project (laretz_libs)
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+set (CMAKE_CXX_STANDARD 11)
+set (CMAKE_CXX_STANDARD_REQUIRED TRUE)
+set (CMAKE_CXX_EXTENSIONS OFF)
+
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pthread")
 
 find_package (Boost REQUIRED serialization)
